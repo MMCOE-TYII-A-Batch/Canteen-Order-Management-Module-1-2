@@ -1,0 +1,66 @@
+<nav class="navbar">
+
+    <div class="nav-container">
+
+        <a href="../../index.html" class="nav-logo">
+            CanteenHub
+        </a>
+
+        <div class="menu-toggle" id="menu-toggle">
+            &#9776;
+        </div>
+
+        <ul class="nav-menu" id="nav-menu">
+
+            <li>
+                <a href="../../index.html" class="active">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="../../member-A/pages/catalog.html">
+                    Menu
+                </a>
+            </li>
+
+            <li>
+                <a href="../../member-C/pages/special-dishes.html">
+                    Offers
+                </a>
+            </li>
+
+            <li>
+                <a href="../../member-A/pages/order-history.html">
+                    Orders
+                </a>
+            </li>
+
+            <li>
+                <a href="../../member-A/pages/profile.html">
+                    Profile
+                </a>
+            </li>
+
+            <li>
+                <a href="../../member-A/pages/login.html">
+                    Login
+                </a>
+            </li>
+
+        </ul>
+
+    </div>
+
+</nav>
+
+<script>
+const menuToggle = document.getElementById("menu-toggle");
+const navMenu = document.getElementById("nav-menu");
+
+if (menuToggle) {
+    menuToggle.addEventListener("click", () => {
+        navMenu.classList.toggle("active");
+    });
+}
+</script>
