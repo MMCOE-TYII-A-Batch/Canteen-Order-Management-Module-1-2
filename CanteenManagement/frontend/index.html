@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Basic Meta Tags -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus Canteen Management System | Home</title>
+
+  <!-- Bootstrap 5 CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Custom Canteen Stylesheet -->
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- ========================================================================== -->
+  <!-- 1. NAVIGATION BAR SECTION                                                 -->
+  <!-- ========================================================================== -->
+  <nav class="navbar navbar-expand-lg canteen-navbar navbar-dark">
+    <div class="container">
+      <!-- Brand Logo & Title -->
+      <a class="navbar-brand d-flex align-items-center" href="index.html">
+        <i class="bi bi-cup-hot-fill me-2 fs-3 text-warning"></i>
+        <span>Campus Canteen</span>
+      </a>
+
+      <!-- Mobile Toggle Button -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#canteenNavbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Navbar Navigation Links -->
+      <div class="collapse navbar-collapse" id="canteenNavbarNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="menu.html">Menu</a></li>
+          <li class="nav-item"><a class="nav-link" href="about.html">About Us</a></li>
+          <li class="nav-item"><a class="nav-link" href="contact.html">Contact Us</a></li>
+        </ul>
+
+        <!-- Right Side Auth & Cart Links -->
+        <div class="d-flex align-items-center gap-2">
+          <a href="menu.html" class="btn btn-outline-warning position-relative me-2">
+            <i class="bi bi-cart3"></i> Cart
+            <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+          </a>
+          <a href="login.html" class="btn btn-canteen-secondary btn-sm">Login</a>
+          <a href="register.html" class="btn btn-canteen-primary btn-sm">Register</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ========================================================================== -->
+  <!-- 2. MAIN CONTENT AREA                                                       -->
+  <!-- ========================================================================== -->
+  <main class="container my-4">
+
+    <!-- HERO BANNER SECTION -->
+    <section class="hero-banner mb-5">
+      <div class="container py-3">
+        <h1 class="display-4 fw-bold">Fresh, Fast & Delicious Campus Dining</h1>
+        <p class="lead">Skip the queue! Order your favorite meals online from your department or hostel.</p>
+        <div class="d-flex justify-content-center gap-3">
+          <a href="menu.html" class="btn btn-canteen-secondary btn-lg">Explore Menu</a>
+          <a href="login.html" class="btn btn-canteen-primary btn-lg">Order Now</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUICK CATEGORY SHORTCUTS SECTION -->
+    <section class="mb-5">
+      <h2 class="fw-bold mb-4 text-center">Popular Categories</h2>
+      <div class="row text-center g-4">
+        <div class="col-md-3 col-6">
+          <div class="card custom-card p-3 h-100">
+            <i class="bi bi-egg-fried display-4 text-warning mb-2"></i>
+            <h5 class="fw-bold">Breakfast</h5>
+            <a href="menu.html" class="stretched-link"></a>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="card custom-card p-3 h-100">
+            <i class="bi bi-border-outer display-4 text-warning mb-2"></i>
+            <h5 class="fw-bold">Main Meals</h5>
+            <a href="menu.html" class="stretched-link"></a>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="card custom-card p-3 h-100">
+            <i class="bi bi-box-seam display-4 text-warning mb-2"></i>
+            <h5 class="fw-bold">Snacks</h5>
+            <a href="menu.html" class="stretched-link"></a>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="card custom-card p-3 h-100">
+            <i class="bi bi-cup-straw display-4 text-warning mb-2"></i>
+            <h5 class="fw-bold">Beverages</h5>
+            <a href="menu.html" class="stretched-link"></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURED DISHES CAROUSEL SECTION -->
+    <section class="mb-5">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold mb-0">Today's Specials</h2>
+        <a href="menu.html" class="btn btn-sm btn-outline-dark">View Full Menu &rarr;</a>
+      </div>
+
+      <div class="row g-4">
+        <!-- Dish Card 1 -->
+        <div class="col-md-4">
+          <div class="card custom-card h-100">
+            <img src="assets/images/burger.jpg" class="card-img-top dish-img" alt="Veg Cheese Burger">
+            <div class="card-body">
+              <span class="badge badge-offer mb-2">Special Offer</span>
+              <h5 class="card-title fw-bold">Veg Cheese Burger</h5>
+              <p class="card-text text-secondary small">Crispy patty, fresh veggies, and melted cheese slice.</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fs-5 fw-bold">₹80</span>
+                <button class="btn btn-sm btn-canteen-primary" onclick="addToCartMock('Veg Cheese Burger', 80)">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dish Card 2 -->
+        <div class="col-md-4">
+          <div class="card custom-card h-100">
+            <img src="assets/images/pizza.jpg" class="card-img-top dish-img" alt="Paneer Pizza">
+            <div class="card-body">
+              <span class="badge badge-combo mb-2">Combo Pack</span>
+              <h5 class="card-title fw-bold">Paneer Pizza</h5>
+              <p class="card-text text-secondary small">Freshly baked pizza loaded with paneer and capsicum.</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fs-5 fw-bold">₹150</span>
+                <button class="btn btn-sm btn-canteen-primary" onclick="addToCartMock('Paneer Pizza', 150)">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dish Card 3 -->
+        <div class="col-md-4">
+          <div class="card custom-card h-100">
+            <img src="assets/images/thali.jpg" class="card-img-top dish-img" alt="Special Veg Thali">
+            <div class="card-body">
+              <span class="badge badge-recommended mb-2">Chef Recommended</span>
+              <h5 class="card-title fw-bold">Special Veg Thali</h5>
+              <p class="card-text text-secondary small">Complete nutritious meal with curries, dal, rice, and roti.</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fs-5 fw-bold">₹120</span>
+                <button class="btn btn-sm btn-canteen-primary" onclick="addToCartMock('Special Veg Thali', 120)">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD QUICK PORTALS SECTION -->
+    <section class="p-4 bg-white rounded-3 shadow-sm mb-4">
+      <h3 class="fw-bold mb-3">User Dashboards Quick Access</h3>
+      <p class="text-secondary">Demo links to explore different role-based views:</p>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="student-dashboard.html" class="btn btn-outline-primary"><i class="bi bi-person-fill"></i> Student Dashboard</a>
+        <a href="manager-dashboard.html" class="btn btn-outline-dark"><i class="bi bi-speedometer2"></i> Manager Dashboard</a>
+        <a href="staff-dashboard.html" class="btn btn-outline-warning text-dark"><i class="bi bi-cup-hot"></i> Staff Dashboard</a>
+        <a href="manage-users.html" class="btn btn-outline-secondary"><i class="bi bi-people"></i> Manage Users</a>
+        <a href="manage-menu.html" class="btn btn-outline-success"><i class="bi bi-journal-text"></i> Manage Menu</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================== -->
+  <!-- 3. FOOTER SECTION                                                          -->
+  <!-- ========================================================================== -->
+  <footer class="canteen-footer">
+    <div class="container text-center text-md-start">
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <h5 class="text-warning fw-bold"><i class="bi bi-cup-hot-fill me-2"></i>Campus Canteen</h5>
+          <p class="small text-secondary">Providing fresh, hygienic, and affordable meals to college students, faculty, and staff every day.</p>
+        </div>
+        <div class="col-md-4 mb-3">
+          <h5 class="text-white fw-bold">Quick Links</h5>
+          <ul class="list-unstyled small">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="menu.html">Full Menu</a></li>
+            <li><a href="about.html">About Canteen</a></li>
+            <li><a href="contact.html">Help & Contact</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4 mb-3">
+          <h5 class="text-white fw-bold">Canteen Timings</h5>
+          <p class="small text-secondary mb-1"><i class="bi bi-clock me-1"></i> Mon - Sat: 8:00 AM - 7:00 PM</p>
+          <p class="small text-secondary"><i class="bi bi-geo-alt me-1"></i> Main Student Activity Center, Block B</p>
+        </div>
+      </div>
+      <hr class="bg-secondary">
+      <div class="text-center small text-secondary">
+        &copy; 2026 Campus Canteen Management System. Educational Project for Computer Engineering.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Global Custom JS -->
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

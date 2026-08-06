@@ -1,0 +1,202 @@
+/* ==========================================================================
+   CAMPUS CANTEEN MANAGEMENT SYSTEM - STYLESHEET (style.css)
+   --------------------------------------------------------------------------
+   Educational Project - Simple, Modern & Responsive CSS using Bootstrap 5
+   Color Palette:
+   - Background: #FFF8E7 (Warm Cream)
+   - Primary: #FFC107 (Amber/Yellow)
+   - Dark: #222222 (Charcoal)
+   - Accent: #FF9800 (Warm Orange)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. GLOBAL STYLES & ROOT VARIABLES
+   -------------------------------------------------------------------------- */
+:root {
+  --bg-cream: #FFF8E7;
+  --primary-yellow: #FFC107;
+  --primary-hover: #e0a800;
+  --dark-charcoal: #222222;
+  --light-card: #ffffff;
+  --soft-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  --border-radius-custom: 12px;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--dark-charcoal);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure footer stays at the bottom of short pages */
+main {
+  flex: 1;
+}
+
+/* --------------------------------------------------------------------------
+   2. NAVBAR STYLING
+   -------------------------------------------------------------------------- */
+.canteen-navbar {
+  background-color: var(--dark-charcoal) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.canteen-navbar .navbar-brand {
+  color: var(--primary-yellow) !important;
+  font-weight: 700;
+  font-size: 1.4rem;
+  letter-spacing: 0.5px;
+}
+
+.canteen-navbar .nav-link {
+  color: #e0e0e0 !important;
+  font-weight: 500;
+  margin: 0 4px;
+  transition: all 0.2s ease-in-out;
+}
+
+.canteen-navbar .nav-link:hover,
+.canteen-navbar .nav-link.active {
+  color: var(--primary-yellow) !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. HERO BANNER
+   -------------------------------------------------------------------------- */
+.hero-banner {
+  background: linear-gradient(rgba(34, 34, 34, 0.75), rgba(34, 34, 34, 0.85)),
+              url('../images/hero-banner.jpg') center/cover no-repeat;
+  color: #ffffff;
+  padding: 80px 20px;
+  border-radius: var(--border-radius-custom);
+  text-align: center;
+  box-shadow: var(--soft-shadow);
+}
+
+.hero-banner h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: var(--primary-yellow);
+}
+
+.hero-banner p {
+  font-size: 1.2rem;
+  margin-bottom: 25px;
+  color: #f0f0f0;
+}
+
+/* --------------------------------------------------------------------------
+   4. CARDS & BADGES
+   -------------------------------------------------------------------------- */
+.custom-card {
+  background-color: var(--light-card);
+  border: none;
+  border-radius: var(--border-radius-custom);
+  box-shadow: var(--soft-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.custom-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.dish-img {
+  height: 200px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.badge-offer {
+  background-color: #dc3545;
+  color: #ffffff;
+}
+
+.badge-combo {
+  background-color: #0d6efd;
+  color: #ffffff;
+}
+
+.badge-recommended {
+  background-color: #198754;
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   5. BUTTONS
+   -------------------------------------------------------------------------- */
+/* Primary Black Button with Yellow Hover */
+.btn-canteen-primary {
+  background-color: var(--dark-charcoal);
+  color: #ffffff;
+  border: 2px solid var(--dark-charcoal);
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 8px 20px;
+  transition: all 0.25s ease;
+}
+
+.btn-canteen-primary:hover {
+  background-color: var(--primary-yellow);
+  color: var(--dark-charcoal);
+  border-color: var(--primary-yellow);
+}
+
+/* Secondary Accent Button */
+.btn-canteen-secondary {
+  background-color: var(--primary-yellow);
+  color: var(--dark-charcoal);
+  border: 2px solid var(--primary-yellow);
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 8px 20px;
+  transition: all 0.25s ease;
+}
+
+.btn-canteen-secondary:hover {
+  background-color: var(--dark-charcoal);
+  color: var(--primary-yellow);
+  border-color: var(--dark-charcoal);
+}
+
+/* --------------------------------------------------------------------------
+   6. TABLES & DASHBOARDS
+   -------------------------------------------------------------------------- */
+.table-custom {
+  background-color: #ffffff;
+  border-radius: var(--border-radius-custom);
+  overflow: hidden;
+  box-shadow: var(--soft-shadow);
+}
+
+.table-custom thead {
+  background-color: var(--dark-charcoal);
+  color: var(--primary-yellow);
+}
+
+.stat-card {
+  border-left: 5px solid var(--primary-yellow);
+}
+
+/* --------------------------------------------------------------------------
+   7. FOOTER
+   -------------------------------------------------------------------------- */
+.canteen-footer {
+  background-color: var(--dark-charcoal);
+  color: #cccccc;
+  padding: 30px 0 15px 0;
+  margin-top: 50px;
+}
+
+.canteen-footer a {
+  color: var(--primary-yellow);
+  text-decoration: none;
+}
+
+.canteen-footer a:hover {
+  text-decoration: underline;
+}
