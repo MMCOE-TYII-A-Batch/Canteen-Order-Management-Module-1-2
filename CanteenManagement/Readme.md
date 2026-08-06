@@ -1,2 +1,2 @@
 Activity diagram :
-![Activity Diagram](images/activity-diagram.jpeg)
+<img src="images/activity-diagram.jpeg" alt="Activity Diagram" width="600">
