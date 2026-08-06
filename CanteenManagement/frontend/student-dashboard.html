@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard | Campus Canteen System</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- STUDENT NAVBAR WITH SPECIFIC NAVIGATION -->
+  <nav class="navbar navbar-expand-lg canteen-navbar navbar-dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="index.html">
+        <i class="bi bi-cup-hot-fill me-2 fs-3 text-warning"></i>
+        <span>Campus Canteen <small class="fs-6 text-warning opacity-75">| Student Portal</small></span>
+      </a>
+      
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#studentNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="studentNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link active" href="student-dashboard.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="menu.html">View Menu</a></li>
+          <li class="nav-item"><a class="nav-link" href="profile.html">My Profile</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2">
+          <span class="text-light me-2"><i class="bi bi-person-circle text-warning me-1"></i> Rahul Sharma</span>
+          <a href="login.html" class="btn btn-outline-light btn-sm">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- STUDENT DASHBOARD CONTENT -->
+  <main class="container my-4">
+    
+    <!-- WELCOME HEADER -->
+    <div class="row align-items-center mb-4">
+      <div class="col-md-8">
+        <h2 class="fw-bold text-dark mb-1">Welcome back, Rahul! 👋</h2>
+        <p class="text-secondary mb-0">Student ID: CS-2024-042 | Department of Computer Engineering</p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="menu.html" class="btn btn-canteen-primary"><i class="bi bi-plus-circle me-1"></i> Place New Order</a>
+      </div>
+    </div>
+
+    <!-- QUICK STATS CARDS -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-4">
+        <div class="card custom-card p-3 stat-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <p class="text-secondary small mb-1">Active Orders</p>
+              <h3 class="fw-bold text-dark mb-0">2</h3>
+            </div>
+            <i class="bi bi-clock-history fs-1 text-warning"></i>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card custom-card p-3 stat-card" style="border-left-color: #198754;">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <p class="text-secondary small mb-1">Total Orders Completed</p>
+              <h3 class="fw-bold text-dark mb-0">12</h3>
+            </div>
+            <i class="bi bi-check2-circle fs-1 text-success"></i>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card custom-card p-3 stat-card" style="border-left-color: #0d6efd;">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <p class="text-secondary small mb-1">Loyalty Special Offers</p>
+              <h3 class="fw-bold text-dark mb-0">3 Offers</h3>
+            </div>
+            <i class="bi bi-gift fs-1 text-primary"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIVE TRACKING SECTION -->
+    <section class="card custom-card p-4 mb-5">
+      <h4 class="fw-bold mb-3"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Live Order Tracker</h4>
+      <div class="p-3 bg-light rounded-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="fw-bold text-dark">Order #104 - Masala Dosa x 2</span>
+          <span class="badge bg-warning text-dark">Ready For Delivery</span>
+        </div>
+        
+        <!-- Order Progress Bar -->
+        <div class="progress mb-3" style="height: 12px;">
+          <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning text-dark fw-bold" role="progressbar" style="width: 75%;">75% - Ready for Pickup</div>
+        </div>
+
+        <div class="row text-center small text-secondary">
+          <div class="col-3 text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Received</div>
+          <div class="col-3 text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Preparing</div>
+          <div class="col-3 text-dark fw-bold"><i class="bi bi-record-circle-fill text-warning"></i> Ready</div>
+          <div class="col-3 text-muted"><i class="bi bi-circle"></i> Delivered</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUICK ORDER OFFERS SECTION -->
+    <section class="mb-5">
+      <h4 class="fw-bold mb-3"><i class="bi bi-tags-fill text-warning me-2"></i>Special Canteen Offers</h4>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="card custom-card p-3 border-start border-warning border-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="fw-bold mb-1">Exam Season Special Combo</h6>
+                <p class="text-secondary small mb-0">Cold Coffee + Veg Cheese Burger at ₹110 (Save ₹20!)</p>
+              </div>
+              <button class="btn btn-sm btn-canteen-primary" onclick="placeOrder('Exam Special Combo', 110)">Order Offer</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card custom-card p-3 border-start border-success border-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="fw-bold mb-1">Afternoon Meal Special</h6>
+                <p class="text-secondary small mb-0">Special Veg Thali + Gulab Jamun at ₹120</p>
+              </div>
+              <button class="btn btn-sm btn-canteen-primary" onclick="placeOrder('Afternoon Thali Special', 120)">Order Offer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ORDER HISTORY TABLE -->
+    <section class="card custom-card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold mb-0"><i class="bi bi-receipt me-2"></i>My Order History</h4>
+        <button class="btn btn-sm btn-outline-dark" onclick="renderStudentOrderHistory()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Order ID</th>
+              <th>Food Items</th>
+              <th>Total Amount</th>
+              <th>Status</th>
+              <th>Date & Time</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="studentOrderHistoryBody">
+            <!-- Dynamically populated by student.js -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="canteen-footer">
+    <div class="container text-center small text-secondary">
+      &copy; 2026 Campus Canteen Management System. Student Dashboard Portal.
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/student.js"></script>
+</body>
+</html>

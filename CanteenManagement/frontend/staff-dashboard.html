@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Dashboard | Campus Canteen System</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- STAFF NAVBAR -->
+  <nav class="navbar navbar-expand-lg canteen-navbar navbar-dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="index.html">
+        <i class="bi bi-cup-hot-fill me-2 fs-3 text-warning"></i>
+        <span>Campus Canteen <small class="fs-6 text-warning opacity-75">| Staff Operational Portal</small></span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#staffNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="staffNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link active" href="staff-dashboard.html">Staff Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="menu.html">View Menu</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2">
+          <span class="text-light me-2"><i class="bi bi-person-workspace text-warning me-1"></i> Staff Duty Portal</span>
+          <a href="login.html" class="btn btn-outline-light btn-sm">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- STAFF MAIN CONTENT -->
+  <main class="container my-4">
+    
+    <div class="mb-4">
+      <h2 class="fw-bold text-dark mb-1">Canteen Operational Staff Center</h2>
+      <p class="text-secondary mb-0">Manage Kitchen Orders, Delivery Queues, Inventory, and Cashier Tasks</p>
+    </div>
+
+    <!-- BOOTSTRAP NAV TABS FOR SEPARATE STAFF ROLES -->
+    <ul class="nav nav-tabs nav-justified mb-4 fw-bold" id="staffRoleTabs" role="tablist">
+      
+      <!-- Tab 1: Kitchen Staff -->
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active py-3" id="kitchen-tab" data-bs-toggle="tab" data-bs-target="#kitchen-section" type="button" role="tab">
+          <i class="bi bi-fire text-danger me-2"></i>Kitchen Staff Queue
+        </button>
+      </li>
+
+      <!-- Tab 2: Delivery Staff -->
+      <li class="nav-item" role="presentation">
+        <button class="nav-link py-3" id="delivery-tab" data-bs-toggle="tab" data-bs-target="#delivery-section" type="button" role="tab">
+          <i class="bi bi-truck text-warning me-2"></i>Delivery Staff Queue
+        </button>
+      </li>
+
+      <!-- Tab 3: Inventory Staff (Placeholder) -->
+      <li class="nav-item" role="presentation">
+        <button class="nav-link py-3" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventory-section" type="button" role="tab">
+          <i class="bi bi-box-seam text-primary me-2"></i>Inventory Staff (Placeholder)
+        </button>
+      </li>
+
+      <!-- Tab 4: Cashier (Placeholder) -->
+      <li class="nav-item" role="presentation">
+        <button class="nav-link py-3" id="cashier-tab" data-bs-toggle="tab" data-bs-target="#cashier-section" type="button" role="tab">
+          <i class="bi bi-cash-stack text-success me-2"></i>Cashier Counter (Placeholder)
+        </button>
+      </li>
+
+    </ul>
+
+    <!-- TAB CONTENT SECTIONS -->
+    <div class="tab-content" id="staffRoleTabContent">
+
+      <!-- ==================================================================== -->
+      <!-- SECTION 1: KITCHEN STAFF                                             -->
+      <!-- ==================================================================== -->
+      <div class="tab-pane fade show active" id="kitchen-section" role="tabpanel">
+        
+        <div class="row g-4">
+          
+          <!-- Column 1: New Orders -->
+          <div class="col-md-4">
+            <div class="card custom-card p-3 h-100 border-top border-primary border-4">
+              <h5 class="fw-bold mb-3 text-primary d-flex align-items-center">
+                <i class="bi bi-bell-fill me-2"></i>New Incoming Orders
+              </h5>
+              <div id="kitchenNewOrders">
+                <!-- Populated dynamically by staff.js -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Preparing Orders -->
+          <div class="col-md-4">
+            <div class="card custom-card p-3 h-100 border-top border-warning border-4">
+              <h5 class="fw-bold mb-3 text-warning d-flex align-items-center">
+                <i class="bi bi-egg-fried me-2"></i>Orders Being Prepared
+              </h5>
+              <div id="kitchenPreparingOrders">
+                <!-- Populated dynamically by staff.js -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 3: Prepared Orders -->
+          <div class="col-md-4">
+            <div class="card custom-card p-3 h-100 border-top border-success border-4">
+              <h5 class="fw-bold mb-3 text-success d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2"></i>Prepared Orders (Ready)
+              </h5>
+              <div id="kitchenPreparedOrders">
+                <!-- Populated dynamically by staff.js -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ==================================================================== -->
+      <!-- SECTION 2: DELIVERY STAFF                                            -->
+      <!-- ==================================================================== -->
+      <div class="tab-pane fade" id="delivery-section" role="tabpanel">
+        
+        <div class="row g-4">
+          
+          <!-- Column 1: Orders Ready For Delivery -->
+          <div class="col-md-4">
+            <div class="card custom-card p-3 h-100 border-top border-info border-4">
+              <h5 class="fw-bold mb-3 text-info d-flex align-items-center">
+                <i class="bi bi-box2-heart me-2"></i>Ready For Delivery
+              </h5>
+              <div id="deliveryReadyOrders">
+                <!-- Populated dynamically by staff.js -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Assigned Orders -->
+          <div class="col-md-4">
+            <div class="card custom-card p-3 h-100 border-top border-warning border-4">
+              <h5 class="fw-bold mb-3 text-warning d-flex align-items-center">
+                <i class="bi bi-bicycle me-2"></i>Assigned / In Transit
+              </h5>
+              <div id="deliveryAssignedOrders">
+                <!-- Populated dynamically by staff.js -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 3: Delivered Orders -->
+          <div class="col-md-4">
+            <div class="card custom-card p-3 h-100 border-top border-success border-4">
+              <h5 class="fw-bold mb-3 text-success d-flex align-items-center">
+                <i class="bi bi-house-check me-2"></i>Delivered Orders
+              </h5>
+              <div id="deliveryDeliveredOrders">
+                <!-- Populated dynamically by staff.js -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ==================================================================== -->
+      <!-- SECTION 3: INVENTORY STAFF (PLACEHOLDER)                             -->
+      <!-- ==================================================================== -->
+      <div class="tab-pane fade" id="inventory-section" role="tabpanel">
+        <div class="card custom-card p-5 text-center">
+          <i class="bi bi-boxes display-3 text-primary mb-3"></i>
+          <h4 class="fw-bold">Inventory Management Portal (Placeholder)</h4>
+          <p class="text-secondary max-w-50 mx-auto">This section will handle stock levels for raw ingredients, pantry supplies, and low-stock alerts. It will be implemented in future modules.</p>
+          <div class="mt-3">
+            <button class="btn btn-outline-primary" onclick="alert('Inventory check simulation: All stock levels adequate.')">Simulate Stock Audit</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================================== -->
+      <!-- SECTION 4: CASHIER (PLACEHOLDER)                                     -->
+      <!-- ==================================================================== -->
+      <div class="tab-pane fade" id="cashier-section" role="tabpanel">
+        <div class="card custom-card p-5 text-center">
+          <i class="bi bi-calculator display-3 text-success mb-3"></i>
+          <h4 class="fw-bold">Cashier & Point-of-Sale Counter (Placeholder)</h4>
+          <p class="text-secondary max-w-50 mx-auto">This module will manage offline counter payments, cash collection, and UPI QR code transactions in future modules.</p>
+          <div class="mt-3">
+            <button class="btn btn-outline-success" onclick="alert('Cashier counter simulation: Daily cash tally verified.')">Simulate Counter Till Close</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="canteen-footer">
+    <div class="container text-center small text-secondary">
+      &copy; 2026 Campus Canteen Management System. Staff Operational Portal.
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/staff.js"></script>
+</body>
+</html>

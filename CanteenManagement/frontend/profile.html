@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile | Campus Canteen System</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg canteen-navbar navbar-dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="index.html">
+        <i class="bi bi-cup-hot-fill me-2 fs-3 text-warning"></i>
+        <span>Campus Canteen</span>
+      </a>
+
+      <div class="collapse navbar-collapse" id="profileNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="student-dashboard.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="menu.html">View Menu</a></li>
+          <li class="nav-item"><a class="nav-link active" href="profile.html">My Profile</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN PROFILE CONTENT -->
+  <main class="container my-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        
+        <div class="card custom-card p-4">
+          <div class="d-flex align-items-center gap-3 mb-4 border-bottom pb-3">
+            <i class="bi bi-person-bounding-box display-4 text-warning"></i>
+            <div>
+              <h3 class="fw-bold mb-1">Rahul Sharma</h3>
+              <p class="text-secondary mb-0"><span class="badge bg-primary">Student Account</span> | Department of Computer Engineering</p>
+            </div>
+          </div>
+
+          <!-- PROFILE EDIT FORM -->
+          <form onsubmit="event.preventDefault(); showNotification('Profile updated successfully!', 'success');">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Full Name</label>
+                <input type="text" class="form-control" value="Rahul Sharma" required>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Email Address</label>
+                <input type="email" class="form-control" value="rahul@college.edu" readonly>
+                <small class="text-muted">Email cannot be changed directly.</small>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Phone Number</label>
+                <input type="tel" class="form-control" value="9876543210" required>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Student / Employee ID</label>
+                <input type="text" class="form-control" value="CS-2024-042" readonly>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Department</label>
+                <input type="text" class="form-control" value="Computer Engineering" required>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Default Hostel / Block</label>
+                <input type="text" class="form-control" value="Hostel Block B, Room 204">
+              </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+              <button type="submit" class="btn btn-canteen-primary"><i class="bi bi-save me-1"></i> Save Changes</button>
+              <a href="student-dashboard.html" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="canteen-footer">
+    <div class="container text-center small text-secondary">
+      &copy; 2026 Campus Canteen Management System. User Profile.
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
