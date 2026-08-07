@@ -1,16 +1,9 @@
--- ============================================================================
 -- CAMPUS CANTEEN MANAGEMENT SYSTEM - DATABASE SCRIPT (canteen_management.sql)
--- ----------------------------------------------------------------------------
--- Educational Project for Second-Year Computer Engineering Students
--- Tech Stack: MySQL 8.0+
--- Database Name: canteen_management
--- ============================================================================
 
--- Step 1: Create Database if not exists
 CREATE DATABASE IF NOT EXISTS canteen_management;
 USE canteen_management;
 
--- Drop existing tables to allow clean re-execution (Order matters due to Foreign Keys)
+-- Drop existing tables
 DROP TABLE IF EXISTS order_items;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS dishes;
@@ -18,20 +11,16 @@ DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS roles;
 
--- ============================================================================
 -- TABLE 1: roles
--- Defines system roles: Student, Manager, Staff
--- ============================================================================
+
 CREATE TABLE roles (
     role_id INT AUTO_INCREMENT PRIMARY KEY,
     role_name VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255)
 );
 
--- ============================================================================
 -- TABLE 2: users
--- Stores user registration profile data for Students, Managers, and Staff
--- ============================================================================
+
 CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -46,20 +35,16 @@ CREATE TABLE users (
     FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE CASCADE
 );
 
--- ============================================================================
 -- TABLE 3: categories
--- Categorizes food items: Breakfast, Meals, Snacks, Beverages
--- ============================================================================
+
 CREATE TABLE categories (
     category_id INT AUTO_INCREMENT PRIMARY KEY,
     category_name VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255)
 );
 
--- ============================================================================
 -- TABLE 4: dishes
--- Stores menu items available in the canteen
--- ============================================================================
+
 CREATE TABLE dishes (
     dish_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -79,10 +64,8 @@ CREATE TABLE dishes (
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE
 );
 
--- ============================================================================
 -- TABLE 5: orders
--- Stores student order headers
--- ============================================================================
+
 CREATE TABLE orders (
     order_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -92,10 +75,8 @@ CREATE TABLE orders (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
--- ============================================================================
 -- TABLE 6: order_items
--- Stores line item details for each order
--- ============================================================================
+
 CREATE TABLE order_items (
     order_item_id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
@@ -107,19 +88,8 @@ CREATE TABLE order_items (
     FOREIGN KEY (dish_id) REFERENCES dishes(dish_id) ON DELETE CASCADE
 );
 
--- ============================================================================
--- PLACEHOLDERS FOR FUTURE MODULES (MODULE 2+)
--- The following tables will be created in future development weeks:
--- 1. payments      (Payment Gateway & Transaction Logs)
--- 2. inventory     (Raw Material & Pantry Stock Audits)
--- 3. feedback      (Student Food Ratings & Reviews)
--- 4. complaints    (Issue Tickets & Resolution Flow)
--- 5. notifications (Realtime SMS/Email Alerts)
--- ============================================================================
 
--- ============================================================================
--- SAMPLE DATA INSERTION (MANDATORY MODULE 1 DATASET)
--- ============================================================================
+-- SAMPLE DATA INSERTION
 
 -- 1. Insert Roles
 INSERT INTO roles (role_id, role_name, description) VALUES
