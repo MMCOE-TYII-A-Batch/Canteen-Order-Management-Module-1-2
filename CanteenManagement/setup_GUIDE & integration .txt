@@ -1,11 +1,5 @@
 ================================================================================
-CAMPUS CANTEEN MANAGEMENT SYSTEM - COMPLETE TEAM INTEGRATION & SETUP GUIDE
-================================================================================
-
-This guide provides comprehensive, step-by-step instructions for all 3 team members
-to set up, run, integrate, test, and push changes to the GitHub repository.
-
-================================================================================
+CAMPUS CANTEEN MANAGEMENT SYSTEM -  SETUP GUIDE
 SECTION 1: ENVIRONMENT SETUP & SECURE DATABASE CREDENTIALS (FOR ALL MEMBERS)
 ================================================================================
 
@@ -31,6 +25,7 @@ SECTION 1: ENVIRONMENT SETUP & SECURE DATABASE CREDENTIALS (FOR ALL MEMBERS)
 4. 🔒 SECURE MYSQL CREDENTIALS & PORT (KEEP YOUR PASSWORD PRIVATE):
    Default connection URL is set to port 3307:
    jdbc:mysql://localhost:3307/canteen_management
+(you can adjust it based on your local port)
 
    DO NOT hardcode your personal MySQL password in DBConnection.java!
 
@@ -67,12 +62,8 @@ SECTION 1: ENVIRONMENT SETUP & SECURE DATABASE CREDENTIALS (FOR ALL MEMBERS)
       - http://localhost:8080/canteen/dish
       - http://localhost:8080/canteen/order
 
-================================================================================
-SECTION 2: COMPLETED PART 1 & DETAILED ROADMAP FOR MEMBERS 2 & 3
-================================================================================
-
 --------------------------------------------------------------------------------
-PART 1: AUTHENTICATION & USER MANAGEMENT (COMPLETED & VERIFIED)
+PART 1: AUTHENTICATION & USER MANAGEMENT 
 --------------------------------------------------------------------------------
 Key Features Implemented:
 - Database Schema: Expanded 'users' and 'roles' tables with 8 system roles.
@@ -90,14 +81,14 @@ Key Features Implemented:
   * Navbar dynamically renders role-specific 'Dashboard' link and User Profile dropdown.
 
 --------------------------------------------------------------------------------
-PART 2: FOOD CATALOGUE & MENU MANAGEMENT (GUIDE FOR TEAM MEMBER 2)
+PART 2: FOOD CATALOGUE & MENU MANAGEMENT 
 --------------------------------------------------------------------------------
 Assigned Files:
 - Database: tables 'categories' and 'dishes' in canteen_management.sql
 - Java Servlet: CanteenManagement/Backend/DishServlet.java (@WebServlet("/dish"))
 - Frontend UI: CanteenManagement/frontend/menu.html, menu.js, manage-menu.html, manager.js
 
-Implementation Guide for Member 2:
+Implementation Guide :
 1. DishServlet.java GET Request:
    * URL Parameters: ?category=Snacks&sortBy=priceAsc
    * SQL Query: Joins 'dishes' and 'categories' tables.
@@ -112,14 +103,14 @@ Implementation Guide for Member 2:
    * Stock Badging: Displays 'Out of Stock' badge when stockQuantity <= 0 or isAvailable is false.
 
 --------------------------------------------------------------------------------
-PART 3: ORDERS & KITCHEN / DELIVERY WORKFLOW (GUIDE FOR TEAM MEMBER 3)
+PART 3: ORDERS & KITCHEN / DELIVERY WORKFLOW 
 --------------------------------------------------------------------------------
 Assigned Files:
 - Database: tables 'orders' and 'order_items' in canteen_management.sql
 - Java Servlet: CanteenManagement/Backend/OrderServlet.java (@WebServlet("/order"))
 - Frontend UI: CanteenManagement/frontend/student-dashboard.html, student.js, staff-dashboard.html, staff.js
 
-Implementation Guide for Member 3:
+Implementation Guide :
 1. OrderServlet.java POST Request (Order Placement):
    * Form Parameters: userId, dishId, total, quantity
    * Transactional Execution: Inserts record into 'orders' table, retrieves auto-generated order_id, inserts line item into 'order_items' table, and decrements stock_quantity in 'dishes' table atomically using JDBC conn.setAutoCommit(false).
@@ -131,34 +122,6 @@ Implementation Guide for Member 3:
    * staff.js: Renders Kitchen Queue (#kitchenNewOrders, #kitchenPreparingOrders, #kitchenPreparedOrders) and Delivery Queue (#deliveryReadyOrders, #deliveryAssignedOrders, #deliveryDeliveredOrders).
    * Cashier POS Form: Processes offline payment settlement.
 
-================================================================================
-SECTION 3: GIT COMMANDS TO PUSH BRANCH & MERGE TO MAIN
-================================================================================
 
-Follow these exact terminal commands to commit your work, push your branch, and merge it with main:
 
-STEP 1: Check Git status and add modified files
---------------------------------------------------------------------------------
-git status
-git add .
---------------------------------------------------------------------------------
 
-STEP 2: Commit your integration work with a clear message
---------------------------------------------------------------------------------
-git commit -m "Part 1 Integration Complete: Authentication, User Roles, Dynamic Dashboard Session & Menu display fixes"
---------------------------------------------------------------------------------
-
-STEP 3: Push to your remote feature branch (integration-branch)
---------------------------------------------------------------------------------
-git push -u origin main
---------------------------------------------------------------------------------
-(Note: If working on integration-branch, run: git push -u origin integration-branch)
-
-STEP 4: Merge integration branch into main (if working on separate branch)
---------------------------------------------------------------------------------
-git checkout main
-git merge integration-branch
-git push origin main
---------------------------------------------------------------------------------
-
-================================================================================
