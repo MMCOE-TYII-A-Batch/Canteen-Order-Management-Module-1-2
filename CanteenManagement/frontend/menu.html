@@ -64,11 +64,11 @@
         <!-- Category Filter Buttons -->
         <div class="col-md-7 text-md-end">
           <div class="btn-group flex-wrap" role="group">
-            <button type="button" class="btn btn-canteen-primary category-filter-btn" data-category="All" onclick="filterCategory('All')">All Items</button>
-            <button type="button" class="btn btn-outline-dark category-filter-btn" data-category="Breakfast" onclick="filterCategory('Breakfast')">Breakfast</button>
-            <button type="button" class="btn btn-outline-dark category-filter-btn" data-category="Meals" onclick="filterCategory('Meals')">Meals</button>
-            <button type="button" class="btn btn-outline-dark category-filter-btn" data-category="Snacks" onclick="filterCategory('Snacks')">Snacks</button>
-            <button type="button" class="btn btn-outline-dark category-filter-btn" data-category="Beverages" onclick="filterCategory('Beverages')">Beverages</button>
+            <button type="button" class="btn btn-canteen-primary category-btn active" onclick="filterMenuCategory('All')">All Items</button>
+            <button type="button" class="btn btn-outline-dark category-btn" onclick="filterMenuCategory('Breakfast')">Breakfast</button>
+            <button type="button" class="btn btn-outline-dark category-btn" onclick="filterMenuCategory('Meals')">Meals</button>
+            <button type="button" class="btn btn-outline-dark category-btn" onclick="filterMenuCategory('Snacks')">Snacks</button>
+            <button type="button" class="btn btn-outline-dark category-btn" onclick="filterMenuCategory('Beverages')">Beverages</button>
           </div>
         </div>
 
@@ -77,29 +77,167 @@
 
     <!-- DYNAMIC DISHES GRID CONTAINER -->
     <div class="row" id="menuGridContainer">
-      <!-- Dynamically populated by menu.js -->
+      <!-- Dish 1 -->
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card custom-card h-100 shadow-sm">
+          <img src="assets/images/burger.jpg" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Veg Cheese Burger">
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title fw-bold mb-0">Veg Cheese Burger</h5>
+              <span class="badge bg-canteen-accent">₹80</span>
+            </div>
+            <div class="mb-2">
+              <span class="badge bg-secondary me-1">Snacks</span>
+              <span class="badge bg-warning text-dark me-1">Special Offer</span>
+            </div>
+            <p class="card-text text-secondary small flex-grow-1">Crispy vegetable patty with cheese, fresh lettuce, and special sauce.</p>
+            <div class="bg-light p-2 rounded mb-3 small">
+              <div><strong>Ingredients:</strong> Potato, Cheese, Bun, Spices</div>
+              <div><strong>Allergens:</strong> Gluten, Dairy</div>
+              <div><strong>Nutrition:</strong> 350 kcal</div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted small"><i class="bi bi-clock"></i> 10 mins</span>
+              <button class="btn btn-sm btn-canteen-primary" onclick="placeOrder('Veg Cheese Burger', 80, 1)"><i class="bi bi-cart-plus"></i> Order Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dish 2 -->
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card custom-card h-100 shadow-sm">
+          <img src="assets/images/pizza.jpg" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Paneer Pizza">
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title fw-bold mb-0">Paneer Pizza</h5>
+              <span class="badge bg-canteen-accent">₹150</span>
+            </div>
+            <div class="mb-2">
+              <span class="badge bg-secondary me-1">Combos</span>
+            </div>
+            <p class="card-text text-secondary small flex-grow-1">Freshly baked pizza topped with spiced paneer cubes and mozzarella.</p>
+            <div class="bg-light p-2 rounded mb-3 small">
+              <div><strong>Ingredients:</strong> Flour, Paneer, Tomato Sauce, Cheese</div>
+              <div><strong>Allergens:</strong> Gluten, Milk</div>
+              <div><strong>Nutrition:</strong> 520 kcal</div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted small"><i class="bi bi-clock"></i> 15 mins</span>
+              <button class="btn btn-sm btn-canteen-primary" onclick="placeOrder('Paneer Pizza', 150, 2)"><i class="bi bi-cart-plus"></i> Order Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dish 3 -->
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card custom-card h-100 shadow-sm">
+          <img src="assets/images/thali.jpg" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Special Veg Thali">
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title fw-bold mb-0">Special Veg Thali</h5>
+              <span class="badge bg-canteen-accent">₹120</span>
+            </div>
+            <div class="mb-2">
+              <span class="badge bg-secondary me-1">Meals</span>
+              <span class="badge bg-warning text-dark me-1">Special Offer</span>
+            </div>
+            <p class="card-text text-secondary small flex-grow-1">Complete meal with 2 Curries, Dal, Rice, 3 Roti, Salad & Sweet.</p>
+            <div class="bg-light p-2 rounded mb-3 small">
+              <div><strong>Ingredients:</strong> Wheat, Rice, Pulses, Paneer</div>
+              <div><strong>Allergens:</strong> Gluten, Dairy</div>
+              <div><strong>Nutrition:</strong> 650 kcal</div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted small"><i class="bi bi-clock"></i> 12 mins</span>
+              <button class="btn btn-sm btn-canteen-primary" onclick="placeOrder('Special Veg Thali', 120, 3)"><i class="bi bi-cart-plus"></i> Order Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dish 4 -->
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card custom-card h-100 shadow-sm">
+          <img src="assets/images/thali.jpg" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Masala Dosa">
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title fw-bold mb-0">Masala Dosa</h5>
+              <span class="badge bg-canteen-accent">₹60</span>
+            </div>
+            <div class="mb-2">
+              <span class="badge bg-secondary me-1">Breakfast</span>
+            </div>
+            <p class="card-text text-secondary small flex-grow-1">Crispy rice crepe filled with spiced potato masala served with chutney & sambar.</p>
+            <div class="bg-light p-2 rounded mb-3 small">
+              <div><strong>Ingredients:</strong> Rice, Potato, Lentils, Spices</div>
+              <div><strong>Allergens:</strong> Mustard</div>
+              <div><strong>Nutrition:</strong> 280 kcal</div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted small"><i class="bi bi-clock"></i> 8 mins</span>
+              <button class="btn btn-sm btn-canteen-primary" onclick="placeOrder('Masala Dosa', 60, 4)"><i class="bi bi-cart-plus"></i> Order Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dish 5 -->
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card custom-card h-100 shadow-sm">
+          <img src="assets/images/burger.jpg" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Cold Coffee">
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title fw-bold mb-0">Cold Coffee</h5>
+              <span class="badge bg-canteen-accent">₹50</span>
+            </div>
+            <div class="mb-2">
+              <span class="badge bg-secondary me-1">Beverages</span>
+            </div>
+            <p class="card-text text-secondary small flex-grow-1">Rich blended coffee topped with chocolate syrup and vanilla ice cream.</p>
+            <div class="bg-light p-2 rounded mb-3 small">
+              <div><strong>Ingredients:</strong> Milk, Coffee, Sugar, Ice Cream</div>
+              <div><strong>Allergens:</strong> Dairy</div>
+              <div><strong>Nutrition:</strong> 210 kcal</div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted small"><i class="bi bi-clock"></i> 5 mins</span>
+              <button class="btn btn-sm btn-canteen-primary" onclick="placeOrder('Cold Coffee', 50, 5)"><i class="bi bi-cart-plus"></i> Order Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dish 6 -->
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card custom-card h-100 shadow-sm">
+          <img src="assets/images/thali.jpg" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Chole Bhature">
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title fw-bold mb-0">Chole Bhature</h5>
+              <span class="badge bg-canteen-accent">₹90</span>
+            </div>
+            <div class="mb-2">
+              <span class="badge bg-secondary me-1">Breakfast</span>
+            </div>
+            <p class="card-text text-secondary small flex-grow-1">Spiced chickpea curry with fluffy bhaturas served with pickle.</p>
+            <div class="bg-light p-2 rounded mb-3 small">
+              <div><strong>Ingredients:</strong> Flour, Chickpeas, Spices</div>
+              <div><strong>Allergens:</strong> Gluten</div>
+              <div><strong>Nutrition:</strong> 480 kcal</div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted small"><i class="bi bi-clock"></i> 10 mins</span>
+              <button class="btn btn-sm btn-canteen-primary" onclick="placeOrder('Chole Bhature', 90, 6)"><i class="bi bi-cart-plus"></i> Order Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   </main>
-
-  <!-- BOOTSTRAP DISH DETAIL MODAL -->
-  <div class="modal fade" id="dishDetailModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <div class="modal-header bg-dark text-white">
-          <h5 class="modal-title text-warning fw-bold" id="dishModalTitle">Dish Information</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body" id="dishModalBody">
-          <!-- Populated by menu.js -->
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-canteen-primary" data-bs-dismiss="modal" onclick="showNotification('Added item to cart!', 'success')">Order Now</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <footer class="canteen-footer">
     <div class="container text-center small text-secondary">

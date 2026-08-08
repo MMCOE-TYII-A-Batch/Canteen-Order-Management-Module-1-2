@@ -1,0 +1,18 @@
+# Database Local Configurations with Passwords
+db.properties
+CanteenManagement/WEB-INF/classes/db.properties
+
+# Compiled Java Bytecode
+*.class
+
+# Unzipped JDBC Driver Source & Tests (only .jar is needed)
+CanteenManagement/WEB-INF/mysql-connector-j-26.7.0/
+
+# Temporary duplicate local directory
+canteen/
+
+# IDE and OS settings
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db

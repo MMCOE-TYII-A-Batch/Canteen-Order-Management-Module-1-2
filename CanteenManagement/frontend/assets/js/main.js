@@ -1,16 +1,14 @@
 /* ==========================================================================
    CAMPUS CANTEEN MANAGEMENT SYSTEM - MAIN JAVASCRIPT (main.js)
    --------------------------------------------------------------------------
-   Educational Project - Global Mock Data & Helper Functions
-   This script holds mock arrays for users, dishes, and orders to allow
-   the frontend to run completely independent of any backend server.
+   Educational Project - Global Datasets & Helper Functions
+   Automated Role-Specific Navbar Session Rendering & Dynamic Dashboard Routing
    ========================================================================== */
 
 // --------------------------------------------------------------------------
-// 1. MOCK DATASETS (Independent Client-Side State)
+// 1. MOCK DATASETS (Fallback State)
 // --------------------------------------------------------------------------
 
-// Array of registered users
 const users = [
   { id: 1, name: "Rahul Sharma", email: "rahul@college.edu", role: "Student", department: "Computer Engg", status: "Active" },
   { id: 2, name: "Priya Patel", email: "priya@college.edu", role: "Student", department: "IT Engg", status: "Active" },
@@ -19,7 +17,6 @@ const users = [
   { id: 5, name: "Ramesh Singh", email: "ramesh@college.edu", role: "Staff", department: "Delivery Staff", status: "Active" }
 ];
 
-// Array of food dishes available in the canteen
 const dishes = [
   {
     id: 1,
@@ -103,7 +100,6 @@ const dishes = [
   }
 ];
 
-// Array of order records
 const orders = [
   { id: 101, studentName: "Rahul Sharma", items: "Veg Cheese Burger x 2", total: 160, status: "New", date: "2026-08-06 12:30 PM" },
   { id: 102, studentName: "Priya Patel", items: "Paneer Pizza x 1", total: 150, status: "Preparing", date: "2026-08-06 12:35 PM" },
@@ -113,21 +109,78 @@ const orders = [
 ];
 
 // --------------------------------------------------------------------------
-// 2. HELPER FUNCTIONS
+// 2. HELPER & NAVBAR SESSION FUNCTIONS
 // --------------------------------------------------------------------------
 
-/**
- * Display a user-friendly browser alert notification
- * @param {string} message - Text message to present to user
- * @param {string} type - Notification category (e.g. success, info, warning)
- */
 function showNotification(message, type = "info") {
   alert(`[${type.toUpperCase()}] ${message}`);
 }
 
 /**
- * Automatically highlight active navbar link based on current page filename
+ * Dynamically renders the Dashboard link & logged-in user profile dropdown in navbar
  */
+function renderGlobalNavbarSession() {
+  const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+  if (!userStr) return;
+
+  try {
+    const user = JSON.parse(userStr);
+    if (!user || !user.name) return;
+
+    // Resolve role-specific dashboard page
+    let dashboardPage = "student-dashboard.html";
+    if (user.role === "Manager" || user.role === "Administrator") {
+      dashboardPage = "manager-dashboard.html";
+    } else if (user.role === "Staff" || user.role === "Kitchen Staff" || user.role === "Delivery Staff" || user.role === "Cashier") {
+      dashboardPage = "staff-dashboard.html";
+    }
+
+    const currentPath = window.location.pathname.split("/").pop();
+
+    // 1. Add "Dashboard" link to navbar navigation list
+    const navList = document.querySelector(".navbar-nav");
+    if (navList && !document.getElementById("navDashboardLink")) {
+      const isActive = currentPath === dashboardPage ? "active" : "";
+      
+      const li = document.createElement("li");
+      li.className = "nav-item";
+      li.id = "navDashboardLink";
+      li.innerHTML = `<a class="nav-link ${isActive} fw-bold text-warning" href="${dashboardPage}"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a>`;
+      
+      if (navList.firstElementChild) {
+        navList.insertBefore(li, navList.firstElementChild.nextSibling);
+      } else {
+        navList.appendChild(li);
+      }
+    }
+
+    // 2. Replace static Login button with User Profile dropdown
+    const rightNavContainer = document.querySelector(".navbar .d-flex.align-items-center");
+    if (rightNavContainer) {
+      const loginBtn = rightNavContainer.querySelector("a[href='login.html']");
+      if (loginBtn) {
+        loginBtn.outerHTML = `
+          <div class="dropdown d-inline-block ms-2">
+            <button class="btn btn-outline-warning btn-sm dropdown-toggle d-flex align-items-center gap-1 fw-semibold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-person-circle fs-6"></i>
+              <span>${user.name}</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow">
+              <li><h6 class="dropdown-header text-truncate">Role: ${user.role || 'User'}</h6></li>
+              <li><a class="dropdown-item fw-bold text-dark" href="${dashboardPage}"><i class="bi bi-speedometer2 me-2 text-warning"></i>Dashboard</a></li>
+              <li><a class="dropdown-item" href="profile.html"><i class="bi bi-person me-2"></i>My Profile</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="login.html" onclick="localStorage.clear(); sessionStorage.clear();"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+            </ul>
+          </div>
+        `;
+      }
+    }
+  } catch (e) {
+    console.warn("Failed rendering global navbar session:", e);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   const currentPath = window.location.pathname.split("/").pop();
   const navLinks = document.querySelectorAll(".nav-link");
@@ -139,9 +192,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Display initial total cart items counter if element exists
   const cartBadge = document.getElementById("cart-count");
   if (cartBadge) {
     cartBadge.textContent = "0";
   }
+
+  // Render role-specific navbar options on page load
+  renderGlobalNavbarSession();
 });

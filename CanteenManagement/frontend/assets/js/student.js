@@ -1,24 +1,75 @@
 /* ==========================================================================
    CAMPUS CANTEEN MANAGEMENT SYSTEM - STUDENT DASHBOARD JS (student.js)
    --------------------------------------------------------------------------
-   Educational Project - Handles Student Dashboard features:
-   - View Menu highlights
-   - Place mock orders
-   - Track order status
-   - Render order history
+   PART 3 INTEGRATION: Connects Order Placement & History to OrderServlet (/canteen/order)
+   Dynamic User Profile Loading from Session / Local Storage
    ========================================================================== */
 
-/**
- * Render order history table for student
- */
-function renderStudentOrderHistory() {
+function getActiveUserSession() {
+  const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+  if (!userStr) return null;
+  try {
+    return JSON.parse(userStr);
+  } catch (e) {
+    return null;
+  }
+}
+
+function loadLoggedInUserProfile() {
+  const user = getActiveUserSession();
+  if (user) {
+    const navElem = document.getElementById("navUserName");
+    const welcomeElem = document.getElementById("welcomeUserName");
+    const detailElem = document.getElementById("welcomeUserDetail");
+
+    if (navElem) navElem.textContent = user.name || "Student";
+    if (welcomeElem) welcomeElem.textContent = user.name || "Student";
+    if (detailElem && user.department) {
+      detailElem.textContent = `Department: ${user.department} | Registered Role: ${user.role || 'Student'}`;
+    }
+  }
+}
+
+function getOrderApiUrl(queryString = "") {
+  if (window.location.origin.startsWith("file:") || window.location.port !== "8080") {
+    return "http://localhost:8080/canteen/order" + queryString;
+  }
+  return "/canteen/order" + queryString;
+}
+
+async function fetchStudentOrders() {
+  const tableBody = document.getElementById("studentOrderHistoryBody");
+  if (!tableBody) return;
+
+  const user = getActiveUserSession() || { userId: 1, name: "Rahul Sharma" };
+
+  try {
+    const response = await fetch(getOrderApiUrl(`?userId=${user.userId}`));
+    if (response.ok) {
+      const ordersList = await response.json();
+      renderStudentOrderTable(ordersList);
+      return;
+    }
+  } catch (err) {
+    console.warn("Backend unavailable, using client-side orders fallback:", err);
+  }
+
+  // Fallback to mock orders array
+  renderStudentOrderTable(orders);
+}
+
+function renderStudentOrderTable(ordersList) {
   const tableBody = document.getElementById("studentOrderHistoryBody");
   if (!tableBody) return;
 
   tableBody.innerHTML = "";
 
-  orders.forEach(order => {
-    // Generate status badge color
+  if (ordersList.length === 0) {
+    tableBody.innerHTML = "<tr><td colspan='5' class='text-center text-muted py-3'>No recent orders found.</td></tr>";
+    return;
+  }
+
+  ordersList.forEach(order => {
     let badgeClass = "bg-secondary";
     if (order.status === "New") badgeClass = "bg-primary";
     else if (order.status === "Preparing") badgeClass = "bg-warning text-dark";
@@ -32,53 +83,52 @@ function renderStudentOrderHistory() {
       <td>₹${order.total}</td>
       <td><span class="badge ${badgeClass}">${order.status}</span></td>
       <td>${order.date}</td>
-      <td>
-        <button class="btn btn-sm btn-outline-dark" onclick="trackOrderDetails(${order.id})">
-          <i class="bi bi-geo-alt"></i> Track
-        </button>
-      </td>
     `;
     tableBody.appendChild(row);
   });
 }
 
-/**
- * Simulate placing an order from the UI
- * @param {string} dishName - Name of dish to order
- * @param {number} price - Price of dish
- */
-function placeOrder(dishName, price) {
+async function placeOrder(dishName, price, dishId = 1) {
+  const user = getActiveUserSession() || { userId: 1, name: "Rahul Sharma" };
+
+  try {
+    const formData = new URLSearchParams();
+    formData.append("userId", user.userId);
+    formData.append("dishId", dishId);
+    formData.append("total", price);
+    formData.append("quantity", 1);
+
+    const response = await fetch(getOrderApiUrl(), {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData.toString()
+    });
+
+    const data = await response.json();
+    if (response.ok && data.status === "success") {
+      showNotification(`Order #${data.orderId} placed successfully for ${dishName}!`, "success");
+      fetchStudentOrders();
+      return;
+    }
+  } catch (err) {
+    console.warn("Backend order placement unavailable, simulating locally:", err);
+  }
+
+  // Local fallback
   const newOrderId = 100 + orders.length + 1;
-  const newOrder = {
+  orders.unshift({
     id: newOrderId,
-    studentName: "Rahul Sharma",
+    studentName: user.name,
     items: `${dishName} x 1`,
     total: price,
     status: "New",
     date: new Date().toLocaleString()
-  };
-
-  orders.push(newOrder);
-  showNotification(`Order #${newOrderId} placed successfully for ${dishName}!`, "success");
-  renderStudentOrderHistory();
+  });
+  showNotification(`[Simulation Mode] Order #${newOrderId} placed for ${dishName}!`, "info");
+  fetchStudentOrders();
 }
 
-/**
- * Show alert tracking order status
- * @param {number} orderId - ID of order to track
- */
-function trackOrderDetails(orderId) {
-  const order = orders.find(o => o.id === orderId);
-  if (order) {
-    showNotification(`Order #${order.id} Current Status: ${order.status}`, "info");
-  } else {
-    showNotification("Order not found!", "warning");
-  }
-}
-
-/**
- * Initialize Student Dashboard on page load
- */
 document.addEventListener("DOMContentLoaded", function () {
-  renderStudentOrderHistory();
+  loadLoggedInUserProfile();
+  fetchStudentOrders();
 });

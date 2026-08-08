@@ -1,61 +1,85 @@
 /* ==========================================================================
    CAMPUS CANTEEN MANAGEMENT SYSTEM - STAFF DASHBOARD JS (staff.js)
    --------------------------------------------------------------------------
-   Educational Project - Kitchen & Delivery Staff Workflow State Machine:
-   - Kitchen Workflow: New -> Preparing -> Prepared / Ready For Delivery
-   - Delivery Workflow: Ready For Delivery -> Assigned -> Delivered
-   Includes placeholders for Inventory Staff and Cashier modules.
+   PART 3 INTEGRATION: Connects Kitchen & Delivery queues to OrderServlet (/canteen/order)
+   Dynamic Session User Profile Loading
    ========================================================================== */
 
-/**
- * Render Kitchen Staff orders queues
- */
-function renderKitchenOrders() {
+function getActiveUserSession() {
+  const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+  if (!userStr) return null;
+  try {
+    return JSON.parse(userStr);
+  } catch (e) {
+    return null;
+  }
+}
+
+function loadStaffUserProfile() {
+  const user = getActiveUserSession();
+  if (user) {
+    const navElem = document.getElementById("staffNavName");
+    const welcomeElem = document.getElementById("staffWelcomeName");
+    const detailElem = document.getElementById("staffWelcomeDetail");
+
+    if (navElem) navElem.textContent = user.name + (user.role ? ` (${user.role})` : "");
+    if (welcomeElem) welcomeElem.textContent = user.name;
+    if (detailElem && user.department) {
+      detailElem.textContent = `Department: ${user.department} | Role: ${user.role || 'Staff'} | Operational Duty Center`;
+    }
+  }
+}
+
+async function fetchStaffOrders() {
+  try {
+    const response = await fetch("/canteen/order");
+    if (response.ok) {
+      const allOrders = await response.json();
+      renderKitchenOrdersFromData(allOrders);
+      renderDeliveryOrdersFromData(allOrders);
+      return;
+    }
+  } catch (err) {
+    console.warn("Backend unavailable, using staff orders mock fallback:", err);
+  }
+
+  renderKitchenOrdersFromData(orders);
+  renderDeliveryOrdersFromData(orders);
+}
+
+function renderKitchenOrdersFromData(ordersList) {
   const newOrdersContainer = document.getElementById("kitchenNewOrders");
   const preparingOrdersContainer = document.getElementById("kitchenPreparingOrders");
   const preparedOrdersContainer = document.getElementById("kitchenPreparedOrders");
 
   if (!newOrdersContainer || !preparingOrdersContainer || !preparedOrdersContainer) return;
 
-  // Clear existing containers
   newOrdersContainer.innerHTML = "";
   preparingOrdersContainer.innerHTML = "";
   preparedOrdersContainer.innerHTML = "";
 
-  // 1. Render New Orders
-  const newOrdersList = orders.filter(o => o.status === "New");
-  if (newOrdersList.length === 0) {
+  const newOrders = ordersList.filter(o => o.status === "New");
+  if (newOrders.length === 0) {
     newOrdersContainer.innerHTML = "<p class='text-muted small'>No new orders pending.</p>";
   } else {
-    newOrdersList.forEach(order => {
-      newOrdersContainer.appendChild(createKitchenCard(order, "Accept Order", "bg-primary", () => updateOrderStatus(order.id, "Preparing")));
-    });
+    newOrders.forEach(o => newOrdersContainer.appendChild(createKitchenCard(o, "Accept Order", "bg-primary", () => changeOrderStatus(o.id, "Preparing"))));
   }
 
-  // 2. Render Preparing Orders
-  const preparingOrdersList = orders.filter(o => o.status === "Preparing");
-  if (preparingOrdersList.length === 0) {
+  const preparingOrders = ordersList.filter(o => o.status === "Preparing");
+  if (preparingOrders.length === 0) {
     preparingOrdersContainer.innerHTML = "<p class='text-muted small'>No orders currently preparing.</p>";
   } else {
-    preparingOrdersList.forEach(order => {
-      preparingOrdersContainer.appendChild(createKitchenCard(order, "Mark Prepared", "bg-warning text-dark", () => updateOrderStatus(order.id, "Ready For Delivery")));
-    });
+    preparingOrders.forEach(o => preparingOrdersContainer.appendChild(createKitchenCard(o, "Mark Prepared", "bg-warning text-dark", () => changeOrderStatus(o.id, "Ready For Delivery"))));
   }
 
-  // 3. Render Prepared Orders (Ready to transfer to Delivery)
-  const preparedOrdersList = orders.filter(o => o.status === "Prepared" || o.status === "Ready For Delivery");
-  if (preparedOrdersList.length === 0) {
+  const preparedOrders = ordersList.filter(o => o.status === "Prepared" || o.status === "Ready For Delivery");
+  if (preparedOrders.length === 0) {
     preparedOrdersContainer.innerHTML = "<p class='text-muted small'>No prepared orders in kitchen queue.</p>";
   } else {
-    preparedOrdersList.forEach(order => {
-      preparedOrdersContainer.appendChild(createKitchenCard(order, "Handover to Delivery", "bg-info text-dark", () => showNotification(`Order #${order.id} sent to Delivery Queue!`, "info")));
-    });
+    preparedOrders.forEach(o => preparedOrdersContainer.appendChild(createKitchenCard(o, "Ready For Pickup", "bg-info text-dark", () => showNotification(`Order #${o.id} ready for delivery!`, "info"))));
   }
 }
 
-/**
- * Helper to construct a Kitchen Card DOM element
- */
 function createKitchenCard(order, buttonText, badgeClass, actionCallback) {
   const card = document.createElement("div");
   card.className = "card custom-card mb-3 p-3";
@@ -64,18 +88,15 @@ function createKitchenCard(order, buttonText, badgeClass, actionCallback) {
       <h6 class="fw-bold mb-0">Order #${order.id}</h6>
       <span class="badge ${badgeClass}">${order.status}</span>
     </div>
-    <p class="mb-1 text-secondary small"><strong>Student:</strong> ${order.studentName}</p>
+    <p class="mb-1 text-secondary small"><strong>Student:</strong> ${order.studentName || 'Student'}</p>
     <p class="mb-2 text-dark"><strong>Items:</strong> ${order.items}</p>
-    <button class="btn btn-sm btn-canteen-primary w-100" id="btn-kitchen-${order.id}">${buttonText}</button>
+    <button class="btn btn-sm btn-canteen-primary w-100" id="btn-k-${order.id}">${buttonText}</button>
   `;
-  card.querySelector(`#btn-kitchen-${order.id}`).addEventListener("click", actionCallback);
+  card.querySelector(`#btn-k-${order.id}`).addEventListener("click", actionCallback);
   return card;
 }
 
-/**
- * Render Delivery Staff orders queues
- */
-function renderDeliveryOrders() {
+function renderDeliveryOrdersFromData(ordersList) {
   const readyContainer = document.getElementById("deliveryReadyOrders");
   const assignedContainer = document.getElementById("deliveryAssignedOrders");
   const deliveredContainer = document.getElementById("deliveryDeliveredOrders");
@@ -86,28 +107,21 @@ function renderDeliveryOrders() {
   assignedContainer.innerHTML = "";
   deliveredContainer.innerHTML = "";
 
-  // 1. Ready for Delivery Queue
-  const readyList = orders.filter(o => o.status === "Ready For Delivery" || o.status === "Prepared");
+  const readyList = ordersList.filter(o => o.status === "Ready For Delivery" || o.status === "Prepared");
   if (readyList.length === 0) {
     readyContainer.innerHTML = "<p class='text-muted small'>No orders ready for pickup.</p>";
   } else {
-    readyList.forEach(order => {
-      readyContainer.appendChild(createDeliveryCard(order, "Accept Delivery", "bg-info text-dark", () => updateOrderStatus(order.id, "Out For Delivery")));
-    });
+    readyList.forEach(o => readyContainer.appendChild(createDeliveryCard(o, "Accept Delivery", "bg-info text-dark", () => changeOrderStatus(o.id, "Out For Delivery"))));
   }
 
-  // 2. Assigned / In-Transit Queue
-  const assignedList = orders.filter(o => o.status === "Out For Delivery");
+  const assignedList = ordersList.filter(o => o.status === "Out For Delivery");
   if (assignedList.length === 0) {
     assignedContainer.innerHTML = "<p class='text-muted small'>No active deliveries in transit.</p>";
   } else {
-    assignedList.forEach(order => {
-      assignedContainer.appendChild(createDeliveryCard(order, "Mark Delivered", "bg-warning text-dark", () => updateOrderStatus(order.id, "Delivered")));
-    });
+    assignedList.forEach(o => assignedContainer.appendChild(createDeliveryCard(o, "Mark Delivered", "bg-warning text-dark", () => changeOrderStatus(o.id, "Delivered"))));
   }
 
-  // 3. Delivered Queue
-  const deliveredList = orders.filter(o => o.status === "Delivered");
+  const deliveredList = ordersList.filter(o => o.status === "Delivered");
   if (deliveredList.length === 0) {
     deliveredContainer.innerHTML = "<p class='text-muted small'>No completed deliveries recorded.</p>";
   } else {
@@ -126,9 +140,6 @@ function renderDeliveryOrders() {
   }
 }
 
-/**
- * Helper to construct a Delivery Card DOM element
- */
 function createDeliveryCard(order, buttonText, badgeClass, actionCallback) {
   const card = document.createElement("div");
   card.className = "card custom-card mb-3 p-3";
@@ -137,33 +148,47 @@ function createDeliveryCard(order, buttonText, badgeClass, actionCallback) {
       <h6 class="fw-bold mb-0">Order #${order.id}</h6>
       <span class="badge ${badgeClass}">${order.status}</span>
     </div>
-    <p class="mb-1 text-secondary small"><strong>Deliver To:</strong> ${order.studentName}</p>
+    <p class="mb-1 text-secondary small"><strong>Deliver To:</strong> ${order.studentName || 'Student'}</p>
     <p class="mb-2 text-dark"><strong>Items:</strong> ${order.items}</p>
-    <button class="btn btn-sm btn-canteen-secondary w-100" id="btn-delivery-${order.id}">${buttonText}</button>
+    <button class="btn btn-sm btn-canteen-secondary w-100" id="btn-d-${order.id}">${buttonText}</button>
   `;
-  card.querySelector(`#btn-delivery-${order.id}`).addEventListener("click", actionCallback);
+  card.querySelector(`#btn-d-${order.id}`).addEventListener("click", actionCallback);
   return card;
 }
 
-/**
- * Update order status and refresh Kitchen & Delivery dashboards
- * @param {number} orderId - Target order ID
- * @param {string} newStatus - New status value
- */
-function updateOrderStatus(orderId, newStatus) {
+async function changeOrderStatus(orderId, newStatus) {
+  try {
+    const formData = new URLSearchParams();
+    formData.append("action", "updateStatus");
+    formData.append("orderId", orderId);
+    formData.append("newStatus", newStatus);
+
+    const response = await fetch("/canteen/order", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData.toString()
+    });
+
+    const data = await response.json();
+    if (response.ok && data.status === "success") {
+      showNotification(`Order #${orderId} status updated to ${newStatus}`, "success");
+      fetchStaffOrders();
+      return;
+    }
+  } catch (err) {
+    console.warn("Backend unavailable, simulating status update locally:", err);
+  }
+
+  // Local fallback
   const order = orders.find(o => o.id === orderId);
   if (order) {
     order.status = newStatus;
-    showNotification(`Order #${order.id} status updated to: ${newStatus}`, "success");
-    renderKitchenOrders();
-    renderDeliveryOrders();
+    showNotification(`[Simulation Mode] Order #${orderId} updated to ${newStatus}`, "info");
+    fetchStaffOrders();
   }
 }
 
-/**
- * Initialize Staff Dashboard workflows on DOM Load
- */
 document.addEventListener("DOMContentLoaded", function () {
-  renderKitchenOrders();
-  renderDeliveryOrders();
+  loadStaffUserProfile();
+  fetchStaffOrders();
 });

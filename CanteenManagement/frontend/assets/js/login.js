@@ -1,50 +1,69 @@
 /* ==========================================================================
    CAMPUS CANTEEN MANAGEMENT SYSTEM - LOGIN JAVASCRIPT (login.js)
    --------------------------------------------------------------------------
-   Educational Project - Handles user authentication simulations.
-   Redirects users to their specific dashboard based on selected role:
-   - Student -> student-dashboard.html
-   - Manager -> manager-dashboard.html
-   - Staff   -> staff-dashboard.html
+   PART 1 INTEGRATION: Connects login UI to Java LoginServlet (/canteen/login)
+   Saves persistent login token in localStorage & sessionStorage
    ========================================================================== */
 
-/**
- * Handles the login form submission logic
- * @param {Event} event - HTML form submit event
- */
-function handleLogin(event) {
-  // Prevent page refresh on form submit
+function getLoginApiUrl() {
+  if (window.location.origin.startsWith("file:") || window.location.port !== "8080") {
+    return "http://localhost:8080/canteen/login";
+  }
+  return "/canteen/login";
+}
+
+async function handleLogin(event) {
   event.preventDefault();
 
-  // Get input field values
   const email = document.getElementById("loginEmail").value.trim();
   const password = document.getElementById("loginPassword").value.trim();
   const role = document.getElementById("loginRole").value;
 
-  // Basic validation check
   if (!email || !password || !role) {
     showNotification("Please fill in all required fields!", "warning");
     return;
   }
 
-  // Display success alert message
-  showNotification(`Welcome back! Logged in successfully as ${role}.`, "success");
+  try {
+    const formData = new URLSearchParams();
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("role", role);
 
-  // Redirect to appropriate dashboard based on selected role
-  if (role === "Student") {
-    window.location.href = "student-dashboard.html";
-  } else if (role === "Manager") {
-    window.location.href = "manager-dashboard.html";
-  } else if (role === "Staff") {
-    window.location.href = "staff-dashboard.html";
-  } else {
-    showNotification("Invalid role selected!", "warning");
+    const apiUrl = getLoginApiUrl();
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData.toString()
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.status === "success") {
+      // Store in both localStorage and sessionStorage for persistent login
+      localStorage.setItem("user", JSON.stringify(data));
+      sessionStorage.setItem("user", JSON.stringify(data));
+
+      showNotification(`Welcome back, ${data.name}! Logged in as ${data.role}.`, "success");
+
+      setTimeout(() => {
+        if (data.role === "Student" || data.role === "Customer") {
+          window.location.href = "student-dashboard.html";
+        } else if (data.role === "Manager" || data.role === "Administrator") {
+          window.location.href = "manager-dashboard.html";
+        } else {
+          window.location.href = "staff-dashboard.html";
+        }
+      }, 1000);
+    } else {
+      showNotification(data.message || "Login failed! Please check credentials.", "warning");
+    }
+  } catch (error) {
+    console.error("Login API error:", error);
+    showNotification("Failed to connect to backend server. Check Tomcat server at http://localhost:8080.", "warning");
   }
 }
 
-/**
- * Attach event listener when DOM content is loaded
- */
 document.addEventListener("DOMContentLoaded", function () {
   const loginForm = document.getElementById("loginForm");
   if (loginForm) {

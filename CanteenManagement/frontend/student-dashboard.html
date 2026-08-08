@@ -30,8 +30,8 @@
           <li class="nav-item"><a class="nav-link" href="profile.html">My Profile</a></li>
         </ul>
         <div class="d-flex align-items-center gap-2">
-          <span class="text-light me-2"><i class="bi bi-person-circle text-warning me-1"></i> Rahul Sharma</span>
-          <a href="login.html" class="btn btn-outline-light btn-sm">Logout</a>
+          <span class="text-light me-2"><i class="bi bi-person-circle text-warning me-1"></i> <span id="navUserName">Student</span></span>
+          <a href="login.html" class="btn btn-outline-light btn-sm" onclick="sessionStorage.clear()">Logout</a>
         </div>
       </div>
     </div>
@@ -43,8 +43,8 @@
     <!-- WELCOME HEADER -->
     <div class="row align-items-center mb-4">
       <div class="col-md-8">
-        <h2 class="fw-bold text-dark mb-1">Welcome back, Rahul! 👋</h2>
-        <p class="text-secondary mb-0">Student ID: CS-2024-042 | Department of Computer Engineering</p>
+        <h2 class="fw-bold text-dark mb-1">Welcome back, <span id="welcomeUserName">Student</span>! 👋</h2>
+        <p class="text-secondary mb-0" id="welcomeUserDetail">Student Portal | Department of Computer Engineering</p>
       </div>
       <div class="col-md-4 text-md-end mt-3 mt-md-0">
         <a href="menu.html" class="btn btn-canteen-primary"><i class="bi bi-plus-circle me-1"></i> Place New Order</a>
@@ -88,29 +88,6 @@
       </div>
     </div>
 
-    <!-- LIVE TRACKING SECTION -->
-    <section class="card custom-card p-4 mb-5">
-      <h4 class="fw-bold mb-3"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Live Order Tracker</h4>
-      <div class="p-3 bg-light rounded-3">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <span class="fw-bold text-dark">Order #104 - Masala Dosa x 2</span>
-          <span class="badge bg-warning text-dark">Ready For Delivery</span>
-        </div>
-        
-        <!-- Order Progress Bar -->
-        <div class="progress mb-3" style="height: 12px;">
-          <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning text-dark fw-bold" role="progressbar" style="width: 75%;">75% - Ready for Pickup</div>
-        </div>
-
-        <div class="row text-center small text-secondary">
-          <div class="col-3 text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Received</div>
-          <div class="col-3 text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Preparing</div>
-          <div class="col-3 text-dark fw-bold"><i class="bi bi-record-circle-fill text-warning"></i> Ready</div>
-          <div class="col-3 text-muted"><i class="bi bi-circle"></i> Delivered</div>
-        </div>
-      </div>
-    </section>
-
     <!-- QUICK ORDER OFFERS SECTION -->
     <section class="mb-5">
       <h4 class="fw-bold mb-3"><i class="bi bi-tags-fill text-warning me-2"></i>Special Canteen Offers</h4>
@@ -144,7 +121,7 @@
     <section class="card custom-card p-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="fw-bold mb-0"><i class="bi bi-receipt me-2"></i>My Order History</h4>
-        <button class="btn btn-sm btn-outline-dark" onclick="renderStudentOrderHistory()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+        <button class="btn btn-sm btn-outline-dark" onclick="fetchStudentOrders()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
       </div>
 
       <div class="table-responsive">
@@ -156,7 +133,6 @@
               <th>Total Amount</th>
               <th>Status</th>
               <th>Date & Time</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody id="studentOrderHistoryBody">

@@ -18,7 +18,7 @@
         <i class="bi bi-cup-hot-fill me-2 fs-3 text-warning"></i>
         <span>Campus Canteen <small class="fs-6 text-warning opacity-75">| Manager Portal</small></span>
       </a>
-
+      
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#managerNav">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -31,8 +31,8 @@
           <li class="nav-item"><a class="nav-link" href="menu.html">View Public Menu</a></li>
         </ul>
         <div class="d-flex align-items-center gap-2">
-          <span class="text-light me-2"><i class="bi bi-shield-lock-fill text-warning me-1"></i> Sanjay Kumar (Manager)</span>
-          <a href="login.html" class="btn btn-outline-light btn-sm">Logout</a>
+          <span class="text-light me-2"><i class="bi bi-shield-lock-fill text-warning me-1"></i> <span id="managerNavName">Manager</span></span>
+          <a href="login.html" class="btn btn-outline-light btn-sm" onclick="localStorage.clear(); sessionStorage.clear();">Logout</a>
         </div>
       </div>
     </div>
@@ -43,8 +43,8 @@
     
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h2 class="fw-bold text-dark mb-1">Canteen Manager Overview</h2>
-        <p class="text-secondary mb-0">System Control Center & Daily Analytics</p>
+        <h2 class="fw-bold text-dark mb-1">Welcome back, <span id="managerWelcomeName">Manager</span>! 👋</h2>
+        <p class="text-secondary mb-0" id="managerWelcomeDetail">System Control Center & Daily Analytics</p>
       </div>
       <div class="d-flex gap-2">
         <a href="manage-users.html" class="btn btn-canteen-primary"><i class="bi bi-people-fill me-1"></i> Manage Users</a>
@@ -94,12 +94,12 @@
         </div>
       </div>
 
-      <!-- Card 4: Total Revenue Placeholder -->
+      <!-- Card 4: Total Revenue -->
       <div class="col-md-3 col-sm-6">
         <div class="card custom-card p-3 stat-card" style="border-left-color: #dc3545;">
           <div class="d-flex justify-content-between align-items-center">
             <div>
-              <p class="text-secondary small mb-1 fw-semibold">Revenue (Placeholder)</p>
+              <p class="text-secondary small mb-1 fw-semibold">Revenue</p>
               <h2 class="fw-bold text-dark mb-0" id="totalRevenueCount">₹680</h2>
             </div>
             <i class="bi bi-currency-rupee fs-1 text-danger"></i>
@@ -109,33 +109,18 @@
 
     </div>
 
-    <!-- QUICK ACTIONS & REPORTS SECTION -->
+    <!-- QUICK USER MANAGEMENT SHORTCUTS SECTION -->
     <div class="row g-4 mb-5">
-      
-      <div class="col-md-6">
-        <div class="card custom-card p-4 h-100">
-          <h4 class="fw-bold mb-3"><i class="bi bi-person-lines-fill text-warning me-2"></i>User Management Shortcuts</h4>
+      <div class="col-12">
+        <div class="card custom-card p-4">
+          <h4 class="fw-bold mb-3"><i class="bi bi-person-lines-fill text-warning me-2"></i>User & Operations Management</h4>
           <p class="text-secondary small">Quick access to view registered students, staff members, and manager permissions.</p>
-          <div class="d-flex flex-column gap-2 mt-3">
-            <a href="manage-users.html" class="btn btn-outline-dark text-start py-2"><i class="bi bi-eye me-2"></i> View Registered Students & Staff</a>
-            <button class="btn btn-outline-primary text-start py-2" onclick="alert('Add New User modal will open in Manage Users page.')"><i class="bi bi-person-plus me-2"></i> Register New Staff Member</button>
+          <div class="d-flex flex-wrap gap-3 mt-3">
+            <a href="manage-users.html" class="btn btn-outline-dark py-2 px-3"><i class="bi bi-eye me-2"></i> View Registered Students & Staff</a>
+            <a href="manage-menu.html" class="btn btn-outline-primary py-2 px-3"><i class="bi bi-plus-circle me-2"></i> Add / Edit Menu Dishes</a>
           </div>
         </div>
       </div>
-
-      <div class="col-md-6">
-        <div class="card custom-card p-4 h-100">
-          <h4 class="fw-bold mb-3"><i class="bi bi-bar-chart-line-fill text-success me-2"></i>Canteen Reports Placeholder</h4>
-          <p class="text-secondary small">Analytical insights for sales, daily demand, and category breakdown.</p>
-          <div class="bg-light p-3 rounded-3 text-center py-4">
-            <i class="bi bi-graph-up display-5 text-muted mb-2"></i>
-            <h6 class="fw-bold text-secondary">Sales & Inventory Reports Module</h6>
-            <p class="small text-muted mb-3">Future Module 2 will integrate dynamic MySQL analytical queries.</p>
-            <button class="btn btn-sm btn-outline-secondary" onclick="alert('Export PDF report feature coming in Module 2!')">Generate Sample Summary Report</button>
-          </div>
-        </div>
-      </div>
-
     </div>
 
     <!-- SYSTEM ACTIVITY OVERVIEW -->

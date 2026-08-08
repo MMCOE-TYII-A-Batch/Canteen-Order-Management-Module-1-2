@@ -1,0 +1,164 @@
+================================================================================
+CAMPUS CANTEEN MANAGEMENT SYSTEM - COMPLETE TEAM INTEGRATION & SETUP GUIDE
+================================================================================
+
+This guide provides comprehensive, step-by-step instructions for all 3 team members
+to set up, run, integrate, test, and push changes to the GitHub repository.
+
+================================================================================
+SECTION 1: ENVIRONMENT SETUP & SECURE DATABASE CREDENTIALS (FOR ALL MEMBERS)
+================================================================================
+
+1. PREREQUISITES TO INSTALL:
+   a. Java Development Kit (JDK 17, JDK 21, or JDK 23)
+   b. Apache Tomcat 10.x Server (Tomcat 10 uses the jakarta.servlet package)
+   c. MySQL Server 8.0 & MySQL Workbench (running on port 3307 or 3306)
+   d. VS Code (with Live Server extension) or IntelliJ / Eclipse
+   e. Git for Version Control
+
+2. DATABASE INITIALIZATION:
+   a. Open MySQL Workbench or MySQL Command Line Client.
+   b. Open and execute the database script file:
+      CanteenManagement/Database/canteen_management.sql
+   c. Verify database 'canteen_management' is created with all 8 core tables:
+      - roles, users, categories, dishes, orders, order_items, audit_logs, user_feedback.
+
+3. MYSQL JDBC DRIVER SETUP:
+   a. Ensure 'mysql-connector-j-8.x.x.jar' (or mysql-connector-j-26.7.0.jar) is placed in:
+      - Apache Tomcat 'lib/' directory (e.g., C:\Tomcat\apache-tomcat-10.1.57\lib\mysql-connector-j-26.7.0.jar)
+      - Project's 'CanteenManagement/WEB-INF/lib/' directory.
+
+4. 🔒 SECURE MYSQL CREDENTIALS & PORT (KEEP YOUR PASSWORD PRIVATE):
+   Default connection URL is set to port 3307:
+   jdbc:mysql://localhost:3307/canteen_management
+
+   DO NOT hardcode your personal MySQL password in DBConnection.java!
+
+   Create a file named 'db.properties' inside CanteenManagement/WEB-INF/classes/:
+      db.url=jdbc:mysql://localhost:3307/canteen_management?useSSL=false&allowPublicKeyRetrieval=true
+      db.port=3307
+      db.user=root
+      db.password=YOUR_ACTUAL_MYSQL_PASSWORD
+
+   Note: 'db.properties' is listed in .gitignore so your password WILL NEVER be pushed to Git!
+
+5. COMPILING JAVA SERVLETS:
+   Open terminal in workspace root (e.g., C:\Users\hp5cd\OneDrive\Desktop\edi canteen):
+
+   In PowerShell:
+   --------------------------------------------------------------------------
+   javac -cp "C:\Tomcat\apache-tomcat-10.1.57\lib\servlet-api.jar" -d CanteenManagement/WEB-INF/classes (Get-ChildItem CanteenManagement/Backend/*.java)
+   --------------------------------------------------------------------------
+
+   In Command Prompt (CMD):
+   --------------------------------------------------------------------------
+   javac -cp "C:\Tomcat\apache-tomcat-10.1.57\lib\servlet-api.jar" -d CanteenManagement\WEB-INF\classes CanteenManagement\Backend\*.java
+   --------------------------------------------------------------------------
+
+6. DEPLOYING TO TOMCAT:
+   a. Copy the entire 'CanteenManagement' folder into Tomcat's 'webapps/' directory:
+      C:\Tomcat\apache-tomcat-10.1.57\webapps\canteen\
+   b. Start Tomcat Server by running 'startup.bat' in Tomcat 'bin/' directory:
+      $env:CATALINA_HOME="C:\Tomcat\apache-tomcat-10.1.57"; .\catalina.bat run
+   c. Backend API endpoints are live at:
+      - http://localhost:8080/canteen/login
+      - http://localhost:8080/canteen/register
+      - http://localhost:8080/canteen/user
+      - http://localhost:8080/canteen/dish
+      - http://localhost:8080/canteen/order
+
+================================================================================
+SECTION 2: COMPLETED PART 1 & DETAILED ROADMAP FOR MEMBERS 2 & 3
+================================================================================
+
+--------------------------------------------------------------------------------
+PART 1: AUTHENTICATION & USER MANAGEMENT (COMPLETED & VERIFIED)
+--------------------------------------------------------------------------------
+Key Features Implemented:
+- Database Schema: Expanded 'users' and 'roles' tables with 8 system roles.
+- DBConnection.java: Multi-fallback credential loader (Environment variables + db.properties).
+- RegisterServlet.java (@WebServlet("/register")):
+  * Strictly validates @mmcoe.edu.in email domain requirement.
+  * Resolves user roles (Student -> Customer, Manager -> Manager, Staff -> Kitchen Staff).
+- LoginServlet.java (@WebServlet("/login")):
+  * Verifies email & password against MySQL.
+  * Enforces role compatibility checks (blocks role mismatch with clear warning).
+  * Returns user session JSON payload: { status, userId, name, department, role }.
+- UserServlet.java (@WebServlet("/user")): Fetches profile details & manager user tables.
+- Global Session & Navbar (main.js, student.js, manager.js, staff.js):
+  * Session persisted in localStorage & sessionStorage (no random logouts).
+  * Navbar dynamically renders role-specific 'Dashboard' link and User Profile dropdown.
+
+--------------------------------------------------------------------------------
+PART 2: FOOD CATALOGUE & MENU MANAGEMENT (GUIDE FOR TEAM MEMBER 2)
+--------------------------------------------------------------------------------
+Assigned Files:
+- Database: tables 'categories' and 'dishes' in canteen_management.sql
+- Java Servlet: CanteenManagement/Backend/DishServlet.java (@WebServlet("/dish"))
+- Frontend UI: CanteenManagement/frontend/menu.html, menu.js, manage-menu.html, manager.js
+
+Implementation Guide for Member 2:
+1. DishServlet.java GET Request:
+   * URL Parameters: ?category=Snacks&sortBy=priceAsc
+   * SQL Query: Joins 'dishes' and 'categories' tables.
+   * Returns JSON array of dish objects:
+     [{ "id":1, "name":"Veg Cheese Burger", "category":"Snacks", "price":80, "stockQuantity":40, "isAvailable":true, "image":"assets/images/burger.jpg" }, ...]
+2. DishServlet.java POST Actions:
+   * Action 'toggleAvailability': Updates is_available flag for dishId in MySQL.
+   * Action 'addDish': Inserts a new food item into 'dishes' table with category_id lookup.
+3. Frontend Integration (menu.js):
+   * Function fetchDishesFromBackend(category, sortBy) calls getDishApiUrl() to update #menuGridContainer.
+   * Search Input (#menuSearchInput): Filters liveDishes array locally on keyup event.
+   * Stock Badging: Displays 'Out of Stock' badge when stockQuantity <= 0 or isAvailable is false.
+
+--------------------------------------------------------------------------------
+PART 3: ORDERS & KITCHEN / DELIVERY WORKFLOW (GUIDE FOR TEAM MEMBER 3)
+--------------------------------------------------------------------------------
+Assigned Files:
+- Database: tables 'orders' and 'order_items' in canteen_management.sql
+- Java Servlet: CanteenManagement/Backend/OrderServlet.java (@WebServlet("/order"))
+- Frontend UI: CanteenManagement/frontend/student-dashboard.html, student.js, staff-dashboard.html, staff.js
+
+Implementation Guide for Member 3:
+1. OrderServlet.java POST Request (Order Placement):
+   * Form Parameters: userId, dishId, total, quantity
+   * Transactional Execution: Inserts record into 'orders' table, retrieves auto-generated order_id, inserts line item into 'order_items' table, and decrements stock_quantity in 'dishes' table atomically using JDBC conn.setAutoCommit(false).
+2. OrderServlet.java POST Request (Status State Machine):
+   * Form Parameters: action=updateStatus, orderId, newStatus
+   * Order Status Lifecycle: New -> Preparing -> Prepared / Ready For Delivery -> Out For Delivery -> Delivered.
+3. Frontend Integration (student.js & staff.js):
+   * student.js: Calls fetchStudentOrders() to populate #studentOrderHistoryBody.
+   * staff.js: Renders Kitchen Queue (#kitchenNewOrders, #kitchenPreparingOrders, #kitchenPreparedOrders) and Delivery Queue (#deliveryReadyOrders, #deliveryAssignedOrders, #deliveryDeliveredOrders).
+   * Cashier POS Form: Processes offline payment settlement.
+
+================================================================================
+SECTION 3: GIT COMMANDS TO PUSH BRANCH & MERGE TO MAIN
+================================================================================
+
+Follow these exact terminal commands to commit your work, push your branch, and merge it with main:
+
+STEP 1: Check Git status and add modified files
+--------------------------------------------------------------------------------
+git status
+git add .
+--------------------------------------------------------------------------------
+
+STEP 2: Commit your integration work with a clear message
+--------------------------------------------------------------------------------
+git commit -m "Part 1 Integration Complete: Authentication, User Roles, Dynamic Dashboard Session & Menu display fixes"
+--------------------------------------------------------------------------------
+
+STEP 3: Push to your remote feature branch (integration-branch)
+--------------------------------------------------------------------------------
+git push -u origin main
+--------------------------------------------------------------------------------
+(Note: If working on integration-branch, run: git push -u origin integration-branch)
+
+STEP 4: Merge integration branch into main (if working on separate branch)
+--------------------------------------------------------------------------------
+git checkout main
+git merge integration-branch
+git push origin main
+--------------------------------------------------------------------------------
+
+================================================================================
