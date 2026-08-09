@@ -85,7 +85,7 @@ function renderMenuCards(items) {
             <span class="text-muted small"><i class="bi bi-clock"></i> ${dish.prepTime || '10 mins'}</span>
             ${isOut ? 
               '<button class="btn btn-sm btn-secondary" disabled>Unavailable</button>' : 
-              `<button class="btn btn-sm btn-canteen-primary" onclick="placeOrder('${dish.name}', ${dish.price}, ${dish.id})"><i class="bi bi-cart-plus"></i> Order Now</button>`
+              `<button class="btn btn-sm btn-canteen-primary" onclick="placeOrder('${dish.name.replace(/'/g, "\\'")}', ${dish.price}, ${dish.id}, '${(dish.category || 'Canteen Special').replace(/'/g, "\\'")}', '${(dish.description || '').replace(/'/g, "\\'")}')"><i class="bi bi-cart-plus"></i> Order Now</button>`
             }
           </div>
         </div>

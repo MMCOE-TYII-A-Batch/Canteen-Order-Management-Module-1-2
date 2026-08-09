@@ -41,21 +41,31 @@ async function fetchStudentOrders() {
   const tableBody = document.getElementById("studentOrderHistoryBody");
   if (!tableBody) return;
 
-  const user = getActiveUserSession() || { userId: 1, name: "Rahul Sharma" };
+  const user = getActiveUserSession() || { userId: 1, id: 1, name: "Rahul Sharma" };
+  const currentUserId = user.userId || user.id || 1;
 
+  let apiOrders = [];
   try {
-    const response = await fetch(getOrderApiUrl(`?userId=${user.userId}`));
+    const response = await fetch(getOrderApiUrl(`?userId=${currentUserId}`));
     if (response.ok) {
-      const ordersList = await response.json();
-      renderStudentOrderTable(ordersList);
-      return;
+      apiOrders = await response.json();
     }
   } catch (err) {
     console.warn("Backend unavailable, using client-side orders fallback:", err);
   }
 
-  // Fallback to mock orders array
-  renderStudentOrderTable(orders);
+  const savedLocalOrders = JSON.parse(localStorage.getItem("local_user_orders") || "[]");
+  const userLocalOrders = savedLocalOrders.filter(o => !o.userId || o.userId == currentUserId);
+
+  const orderMap = new Map();
+  userLocalOrders.forEach(o => orderMap.set(o.id, o));
+  apiOrders.forEach(o => orderMap.set(o.id, o));
+  if (orderMap.size === 0 && typeof orders !== "undefined") {
+    orders.forEach(o => orderMap.set(o.id, o));
+  }
+
+  const combinedOrders = Array.from(orderMap.values()).sort((a, b) => b.id - a.id);
+  renderStudentOrderTable(combinedOrders);
 }
 
 function renderStudentOrderTable(ordersList) {
@@ -78,54 +88,14 @@ function renderStudentOrderTable(ordersList) {
 
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>#${order.id}</td>
+      <td><strong>#${order.id}</strong></td>
       <td>${order.items}</td>
-      <td>₹${order.total}</td>
+      <td><span class="fw-bold text-success">₹${order.total}</span></td>
       <td><span class="badge ${badgeClass}">${order.status}</span></td>
-      <td>${order.date}</td>
+      <td><small class="text-secondary">${order.date}</small></td>
     `;
     tableBody.appendChild(row);
   });
-}
-
-async function placeOrder(dishName, price, dishId = 1) {
-  const user = getActiveUserSession() || { userId: 1, name: "Rahul Sharma" };
-
-  try {
-    const formData = new URLSearchParams();
-    formData.append("userId", user.userId);
-    formData.append("dishId", dishId);
-    formData.append("total", price);
-    formData.append("quantity", 1);
-
-    const response = await fetch(getOrderApiUrl(), {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: formData.toString()
-    });
-
-    const data = await response.json();
-    if (response.ok && data.status === "success") {
-      showNotification(`Order #${data.orderId} placed successfully for ${dishName}!`, "success");
-      fetchStudentOrders();
-      return;
-    }
-  } catch (err) {
-    console.warn("Backend order placement unavailable, simulating locally:", err);
-  }
-
-  // Local fallback
-  const newOrderId = 100 + orders.length + 1;
-  orders.unshift({
-    id: newOrderId,
-    studentName: user.name,
-    items: `${dishName} x 1`,
-    total: price,
-    status: "New",
-    date: new Date().toLocaleString()
-  });
-  showNotification(`[Simulation Mode] Order #${newOrderId} placed for ${dishName}!`, "info");
-  fetchStudentOrders();
 }
 
 document.addEventListener("DOMContentLoaded", function () {

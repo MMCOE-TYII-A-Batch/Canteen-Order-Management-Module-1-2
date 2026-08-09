@@ -116,6 +116,271 @@ function showNotification(message, type = "info") {
   alert(`[${type.toUpperCase()}] ${message}`);
 }
 
+function getActiveUserSession() {
+  const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+  if (!userStr) return null;
+  try {
+    return JSON.parse(userStr);
+  } catch (e) {
+    return null;
+  }
+}
+
+function getOrderApiUrl(queryString = "") {
+  if (window.location.origin.startsWith("file:") || window.location.port !== "8080") {
+    return "http://localhost:8080/canteen/order" + queryString;
+  }
+  return "/canteen/order" + queryString;
+}
+
+function updateCartCount() {
+  const cartBadge = document.getElementById("cart-count");
+  if (cartBadge) {
+    let current = parseInt(cartBadge.textContent || "0", 10);
+    cartBadge.textContent = (current + 1).toString();
+  }
+}
+
+// Global Order State for Confirmation Modal
+let activeOrderData = {
+  dishName: "",
+  price: 0,
+  dishId: 1,
+  quantity: 1,
+  category: "Snacks",
+  description: ""
+};
+
+function ensureOrderModalExists() {
+  if (document.getElementById("orderConfirmationModal")) return;
+
+  const modalHtml = `
+    <!-- ORDER DETAILS CONFIRMATION MODAL -->
+    <div class="modal fade" id="orderConfirmationModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0">
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title fw-bold text-warning" id="orderModalLabel">
+              <i class="bi bi-bag-check-fill me-2"></i>Confirm Order Details
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <!-- Selected Dish Details -->
+            <div class="p-3 bg-light rounded border mb-3">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <h5 class="fw-bold mb-1 text-dark" id="modalDishName">Dish Name</h5>
+                  <span class="badge bg-secondary mb-2" id="modalDishCategory">Category</span>
+                  <p class="text-secondary small mb-0" id="modalDishDescription">Description</p>
+                </div>
+                <div class="text-end ms-2">
+                  <span class="fs-4 fw-bold text-success" id="modalDishPrice">₹0</span>
+                  <div class="text-muted small">unit price</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quantity Selector -->
+            <div class="row g-3 align-items-center mb-3">
+              <div class="col-6">
+                <label class="form-label fw-semibold mb-0"><i class="bi bi-plus-slash-minus me-1"></i>Quantity:</label>
+              </div>
+              <div class="col-6 d-flex align-items-center justify-content-end gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary px-3 fw-bold" onclick="adjustOrderQuantity(-1)">-</button>
+                <input type="number" class="form-control form-control-sm text-center fw-bold" id="modalOrderQuantity" value="1" min="1" max="20" style="width: 65px;" readonly>
+                <button type="button" class="btn btn-sm btn-outline-secondary px-3 fw-bold" onclick="adjustOrderQuantity(1)">+</button>
+              </div>
+            </div>
+
+            <!-- Special Note / Location -->
+            <div class="mb-3">
+              <label for="modalOrderNotes" class="form-label fw-semibold"><i class="bi bi-pencil-square me-1"></i>Delivery / Pickup Note:</label>
+              <input type="text" class="form-control form-control-sm" id="modalOrderNotes" placeholder="e.g. Counter Pickup, Deliver to IT Dept, etc.">
+            </div>
+
+            <!-- Payment Method -->
+            <div class="mb-3">
+              <label for="modalPaymentMethod" class="form-label fw-semibold"><i class="bi bi-wallet2 me-1"></i>Payment Option:</label>
+              <select class="form-select form-select-sm" id="modalPaymentMethod">
+                <option value="Cash on Delivery / Pickup" selected>Cash on Delivery / Counter Pickup</option>
+                <option value="UPI / QR Payment">UPI / QR Code Scan</option>
+                <option value="Student Meal Card">Student Campus Meal Card</option>
+              </select>
+            </div>
+
+            <!-- Total Price Summary -->
+            <div class="p-3 bg-warning-subtle border border-warning rounded d-flex justify-content-between align-items-center">
+              <div>
+                <span class="fw-bold text-dark d-block">Total Payable Price:</span>
+                <small class="text-secondary" id="modalCustomerName">Customer: Rahul Sharma</small>
+              </div>
+              <span class="fs-3 fw-bold text-dark" id="modalTotalPrice">₹0</span>
+            </div>
+          </div>
+          <div class="modal-footer bg-light">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-canteen-primary fw-bold px-4" id="confirmPlaceOrderBtn" onclick="submitModalOrder()">
+              <i class="bi bi-check-circle-fill me-1"></i> Confirm & Place Order
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUCCESS NOTIFICATION MODAL -->
+    <div class="modal fade" id="orderSuccessModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center p-4 border-0 shadow-lg">
+          <div class="mb-3 text-success">
+            <i class="bi bi-check-circle-fill display-1"></i>
+          </div>
+          <h4 class="fw-bold mb-2 text-dark">Order Placed Successfully!</h4>
+          <p class="text-secondary" id="successModalBodyText">Your order has been sent to the kitchen staff.</p>
+          <div class="d-flex justify-content-center gap-2 mt-3">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Continue Ordering</button>
+            <a href="student-dashboard.html" class="btn btn-canteen-primary fw-bold">
+              <i class="bi bi-receipt me-1"></i> View My Order History
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+}
+
+function placeOrder(dishName, price, dishId = 1, category = "Snacks", description = "") {
+  ensureOrderModalExists();
+
+  const user = getActiveUserSession() || { userId: 1, id: 1, name: "Rahul Sharma" };
+
+  activeOrderData = {
+    dishName: dishName,
+    price: parseFloat(price) || 0,
+    dishId: dishId,
+    quantity: 1,
+    category: category,
+    description: description || "Freshly prepared campus canteen food item."
+  };
+
+  document.getElementById("modalDishName").textContent = activeOrderData.dishName;
+  document.getElementById("modalDishCategory").textContent = activeOrderData.category;
+  document.getElementById("modalDishDescription").textContent = activeOrderData.description;
+  document.getElementById("modalDishPrice").textContent = `₹${activeOrderData.price}`;
+  document.getElementById("modalOrderQuantity").value = 1;
+  document.getElementById("modalTotalPrice").textContent = `₹${activeOrderData.price}`;
+  document.getElementById("modalCustomerName").textContent = `Customer: ${user.name || 'Rahul Sharma'}`;
+  document.getElementById("modalOrderNotes").value = "";
+
+  const modalElem = document.getElementById("orderConfirmationModal");
+  const bsModal = bootstrap.Modal.getOrCreateInstance(modalElem);
+  bsModal.show();
+}
+
+function adjustOrderQuantity(delta) {
+  activeOrderData.quantity = Math.max(1, activeOrderData.quantity + delta);
+  document.getElementById("modalOrderQuantity").value = activeOrderData.quantity;
+  const totalPrice = activeOrderData.price * activeOrderData.quantity;
+  document.getElementById("modalTotalPrice").textContent = `₹${totalPrice}`;
+}
+
+async function submitModalOrder() {
+  const confirmBtn = document.getElementById("confirmPlaceOrderBtn");
+  if (confirmBtn) confirmBtn.disabled = true;
+
+  const user = getActiveUserSession() || { userId: 1, id: 1, name: "Rahul Sharma" };
+  const qty = activeOrderData.quantity;
+  const total = activeOrderData.price * qty;
+  const notes = document.getElementById("modalOrderNotes")?.value.trim() || "";
+  const paymentMethod = document.getElementById("modalPaymentMethod")?.value || "Cash on Delivery";
+
+  let createdOrderId = 0;
+
+  try {
+    const formData = new URLSearchParams();
+    formData.append("userId", user.userId || user.id || 1);
+    formData.append("dishId", activeOrderData.dishId);
+    formData.append("total", total);
+    formData.append("quantity", qty);
+
+    const response = await fetch(getOrderApiUrl(), {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData.toString()
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.status === "success") {
+        createdOrderId = data.orderId;
+      }
+    }
+  } catch (err) {
+    console.warn("Backend order placement API unavailable, saving order locally:", err);
+  }
+
+  if (!createdOrderId) {
+    createdOrderId = 100 + (typeof orders !== "undefined" ? orders.length : 0) + Math.floor(Math.random() * 10) + 1;
+  }
+
+  const formattedDate = new Date().toLocaleString('en-US', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: true
+  });
+
+  const newOrderObj = {
+    id: createdOrderId,
+    userId: user.userId || user.id || 1,
+    studentName: user.name || "Rahul Sharma",
+    items: `${activeOrderData.dishName} x ${qty}`,
+    total: total,
+    status: "New",
+    date: formattedDate,
+    notes: notes,
+    paymentMethod: paymentMethod
+  };
+
+  // 1. Save to Local Storage for persistent order history across pages
+  const savedLocalOrders = JSON.parse(localStorage.getItem("local_user_orders") || "[]");
+  savedLocalOrders.unshift(newOrderObj);
+  localStorage.setItem("local_user_orders", JSON.stringify(savedLocalOrders));
+
+  // 2. Unshift into in-memory orders array
+  if (typeof orders !== "undefined") {
+    orders.unshift(newOrderObj);
+  }
+
+  // 3. Update Navbar cart counter
+  updateCartCount(qty);
+
+  // 4. Close confirmation modal
+  const confirmModalElem = document.getElementById("orderConfirmationModal");
+  const bsConfirmModal = bootstrap.Modal.getInstance(confirmModalElem);
+  if (bsConfirmModal) bsConfirmModal.hide();
+
+  if (confirmBtn) confirmBtn.disabled = false;
+
+  // 5. Refresh Order History table if on student-dashboard
+  if (typeof fetchStudentOrders === "function") {
+    fetchStudentOrders();
+  }
+
+  // 6. Show Success Dialog
+  document.getElementById("successModalBodyText").innerHTML = `
+    <strong>Order #${newOrderObj.id}</strong> placed for <strong>${activeOrderData.dishName} (x${qty})</strong>.<br>
+    Total Amount: <span class="fw-bold text-success">₹${total}</span>
+  `;
+  const successModalElem = document.getElementById("orderSuccessModal");
+  const bsSuccessModal = bootstrap.Modal.getOrCreateInstance(successModalElem);
+  bsSuccessModal.show();
+}
+
+function addToCartMock(dishName, price, dishId = 1) {
+  placeOrder(dishName, price, dishId);
+}
+
 /**
  * Dynamically renders the Dashboard link & logged-in user profile dropdown in navbar
  */
@@ -126,6 +391,12 @@ function renderGlobalNavbarSession() {
   try {
     const user = JSON.parse(userStr);
     if (!user || !user.name) return;
+
+    // Update hero banner link if user is logged in
+    const heroOrderBtn = document.querySelector(".hero-banner a[href='login.html']");
+    if (heroOrderBtn) {
+      heroOrderBtn.href = "menu.html";
+    }
 
     // Resolve role-specific dashboard page
     let dashboardPage = "student-dashboard.html";
