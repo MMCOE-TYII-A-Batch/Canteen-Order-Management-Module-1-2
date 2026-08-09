@@ -116,8 +116,17 @@ function sortMenuDishes(sortBy) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  fetchDishesFromBackend("All");
+    fetchDishesFromBackend("All");
 
-  const searchInput = document.getElementById("menuSearchInput");
-  if (searchInput) searchInput.addEventListener("input", searchMenuDishes);
+    const searchInput = document.getElementById("menuSearchInput");
+    if (searchInput) {
+        searchInput.addEventListener("input", searchMenuDishes);
+    }
+
+    const sortSelect = document.getElementById("menuSortSelect");
+    if (sortSelect) {
+        sortSelect.addEventListener("change", function () {
+            sortMenuDishes(this.value);
+        });
+    }
 });

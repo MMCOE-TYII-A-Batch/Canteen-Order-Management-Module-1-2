@@ -58,6 +58,15 @@
           <div class="input-group">
             <span class="input-group-text bg-white"><i class="bi bi-search text-warning"></i></span>
             <input type="text" id="menuSearchInput" class="form-control" placeholder="Search for food items (e.g. Burger, Dosa)...">
+            <div class="d-flex justify-content-end align-items-center mb-3">
+            <label for="menuSortSelect" class="me-2 fw-semibold">Sort by:</label>
+            <select id="menuSortSelect" class="form-select" style="width: 220px;">
+            <option value="">Default</option>
+            <option value="priceAsc">Price: Low to High</option>
+            <option value="priceDesc">Price: High to Low</option>
+            <option value="popularity">Popularity</option>
+            </select>
+            </div>
           </div>
         </div>
 
