@@ -1,11 +1,4 @@
-/* ==========================================================================
-   CAMPUS CANTEEN MANAGEMENT SYSTEM - ORDER POJO (Order.java)
-   --------------------------------------------------------------------------
-   Educational Java Model representing a Canteen Food Order.
-   Status Values: New, Preparing, Prepared, Ready For Delivery, Delivered
-   No advanced frameworks - Plain Java with getters, setters & comments.
-   ========================================================================== */
-
+// added Order entity with getter and setter 
 public class Order {
 
     // ----------------------------------------------------------------------
