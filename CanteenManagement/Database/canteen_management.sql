@@ -132,12 +132,12 @@ INSERT INTO roles (role_id, role_name, description) VALUES
 
 -- 2. Insert Users
 INSERT INTO users (user_id, name, email, phone, college_id, department, password, role_id, status, dietary_preferences, default_location) VALUES
-(1, 'Rahul Sharma', 'rahul@college.edu', '9876543210', 'CS-2024-042', 'Computer Engineering', 'pass123', 1, 'Active', 'Vegetarian', 'Hostel Block A'),
-(2, 'Priya Patel', 'priya@college.edu', '9876543211', 'IT-2024-015', 'IT Engineering', 'pass123', 1, 'Active', 'Jain', 'Library Gate'),
-(3, 'Sanjay Kumar', 'sanjay@college.edu', '9876543212', 'MGR-101', 'Canteen Mgmt', 'admin123', 2, 'Active', 'None', 'Main Admin Office'),
-(4, 'Amit Verma', 'amit@college.edu', '9876543213', 'STF-201', 'Kitchen Staff', 'staff123', 3, 'Active', 'None', 'Kitchen Counter'),
-(5, 'Ramesh Singh', 'ramesh@college.edu', '9876543214', 'STF-202', 'Delivery Staff', 'staff123', 7, 'Active', 'None', 'Dispatch Desk'),
-(6, 'Super Admin', 'admin@college.edu', '9876543299', 'ADM-001', 'IT Support', 'admin123', 8, 'Active', 'None', 'System Desk');
+(1, 'Rahul Sharma', 'rahul@college.edu', '9876543210', 'CS-2024-042', 'Computer Engineering', '8d156015d5588109fe09535e770d87d011be10ab3a0b5ab439405cef226903d4', 1, 'Active', 'Vegetarian', 'Hostel Block A'),
+(2, 'Priya Patel', 'priya@college.edu', '9876543211', 'IT-2024-015', 'IT Engineering', '8d156015d5588109fe09535e770d87d011be10ab3a0b5ab439405cef226903d4', 1, 'Active', 'Jain', 'Library Gate'),
+(3, 'Sanjay Kumar', 'sanjay@college.edu', '9876543212', 'MGR-101', 'Canteen Mgmt', '66d260b2c7a31ebb3f91fd4dd383fbca027ac340ceb222b2f69d124b7441e6d9', 2, 'Active', 'None', 'Main Admin Office'),
+(4, 'Amit Verma', 'amit@college.edu', '9876543213', 'STF-201', 'Kitchen Staff', '5b0ebe2e8caaab06af07e8973dd186fa1ef2a90a3ec06db1830bb3efd63945af', 3, 'Active', 'None', 'Kitchen Counter'),
+(5, 'Ramesh Singh', 'ramesh@college.edu', '9876543214', 'STF-202', 'Delivery Staff', '5b0ebe2e8caaab06af07e8973dd186fa1ef2a90a3ec06db1830bb3efd63945af', 7, 'Active', 'None', 'Dispatch Desk'),
+(6, 'Super Admin', 'admin@college.edu', '9876543299', 'ADM-001', 'IT Support', '66d260b2c7a31ebb3f91fd4dd383fbca027ac340ceb222b2f69d124b7441e6d9', 8, 'Active', 'None', 'System Desk');
 
 -- 3. Insert Categories
 INSERT INTO categories (category_id, category_name, description) VALUES

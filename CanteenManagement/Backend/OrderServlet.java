@@ -21,9 +21,21 @@ import jakarta.servlet.http.HttpServletResponse;
 public class OrderServlet extends HttpServlet {
 
     @Override
+    protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        setCorsHeaders(response);
+        response.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    private void setCorsHeaders(HttpServletResponse response) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    }
+
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
+        setCorsHeaders(response);
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
 
@@ -91,6 +103,7 @@ public class OrderServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
+        setCorsHeaders(response);
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
 
@@ -143,6 +156,7 @@ public class OrderServlet extends HttpServlet {
         String insertItemSql = "INSERT INTO order_items (order_id, dish_id, quantity, unit_price, subtotal) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection()) {
+            setCorsHeaders(response);
             conn.setAutoCommit(false); // Transaction
 
             int newOrderId = 0;

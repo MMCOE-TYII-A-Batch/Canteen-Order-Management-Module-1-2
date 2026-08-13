@@ -86,13 +86,15 @@ public class RegisterServlet extends HttpServlet {
                 }
             }
 
+            String normalizedEmail = email.trim().toLowerCase();
+            String hashedPassword = PasswordUtil.hashPassword(password);
             try (PreparedStatement psInsert = conn.prepareStatement(insertUserSql)) {
-                psInsert.setString(1, name);
-                psInsert.setString(2, email);
-                psInsert.setString(3, phone);
-                psInsert.setString(4, collegeId != null ? collegeId : "N/A");
-                psInsert.setString(5, department != null ? department : "General");
-                psInsert.setString(6, password);
+                psInsert.setString(1, name.trim());
+                psInsert.setString(2, normalizedEmail);
+                psInsert.setString(3, phone.trim());
+                psInsert.setString(4, collegeId != null ? collegeId.trim() : "N/A");
+                psInsert.setString(5, department != null ? department.trim() : "General");
+                psInsert.setString(6, hashedPassword);
                 psInsert.setInt(7, roleId);
 
                 int rows = psInsert.executeUpdate();

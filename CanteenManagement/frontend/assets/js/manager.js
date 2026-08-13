@@ -30,12 +30,20 @@ function loadManagerUserProfile() {
   }
 }
 
+function getApiUrl(path, queryString = "") {
+  const contextPath = "/canteen";
+  if (window.location.origin.startsWith("file:") || window.location.port !== "8080") {
+    return `http://localhost:8080${contextPath}${path}${queryString}`;
+  }
+  return `${window.location.origin}${contextPath}${path}${queryString}`;
+}
+
 async function updateManagerStats() {
   try {
     const [uRes, dRes, oRes] = await Promise.all([
-      fetch("/canteen/user"),
-      fetch("/canteen/dish"),
-      fetch("/canteen/order")
+      fetch(getApiUrl("/user")),
+      fetch(getApiUrl("/dish")),
+      fetch(getApiUrl("/order"))
     ]);
 
     if (uRes.ok && dRes.ok && oRes.ok) {
@@ -84,7 +92,7 @@ async function renderUsersTable() {
 
   let userList = users;
   try {
-    const res = await fetch("/canteen/user");
+    const res = await fetch(getApiUrl("/user"));
     if (res.ok) userList = await res.json();
   } catch (e) {
     console.warn("Falling back to local users array:", e);
@@ -118,6 +126,43 @@ function viewUserModal(userId) {
   alert(`USER DETAILS:\nID: #${userId}\nRole: Student/Staff\nStatus: Active`);
 }
 
+function openDishModalForAdd() {
+  document.getElementById("dishModalTitle").textContent = "Add New Food Dish";
+  document.getElementById("dishModalSubmitBtn").textContent = "Save Dish to Menu";
+  document.getElementById("dishId").value = "";
+  document.getElementById("addDishForm").reset();
+}
+
+function openDishModalForEdit(dishId) {
+  const dishSource = window.managerDishList || dishes;
+  const dish = dishSource.find(item => item.id === dishId);
+  if (!dish) {
+    showNotification("Dish not found for editing.", "error");
+    return;
+  }
+
+  document.getElementById("dishModalTitle").textContent = "Edit Dish Details";
+  document.getElementById("dishModalSubmitBtn").textContent = "Update Dish";
+  document.getElementById("dishId").value = dish.id;
+  document.getElementById("dishName").value = dish.name || "";
+
+  const modalEl = document.getElementById("addDishModal");
+  if (modalEl) {
+    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modalInstance.show();
+  }
+  document.getElementById("dishCategory").value = dish.category || "Snacks";
+  document.getElementById("dishPrice").value = dish.price || "";
+  document.getElementById("dishPrepTime").value = dish.prepTime || "";
+  document.getElementById("dishStockQuantity").value = dish.stockQuantity != null ? dish.stockQuantity : 50;
+  document.getElementById("dishIngredients").value = dish.ingredients || "";
+  document.getElementById("dishAllergens").value = dish.allergens || "";
+  document.getElementById("dishNutrition").value = dish.nutrition || "";
+  document.getElementById("dishServingWindow").value = dish.servingWindow || "All Day";
+  document.getElementById("dishImageUrl").value = dish.image || "";
+  document.getElementById("dishDesc").value = dish.description || "";
+}
+
 async function renderMenuManagementTable() {
   const tableBody = document.getElementById("manageMenuTableBody");
   if (!tableBody) return;
@@ -126,11 +171,13 @@ async function renderMenuManagementTable() {
 
   let dishList = dishes;
   try {
-    const res = await fetch("/canteen/dish");
+    const res = await fetch(getApiUrl("/dish"));
     if (res.ok) dishList = await res.json();
   } catch (e) {
     console.warn("Falling back to local dishes array:", e);
   }
+
+  window.managerDishList = dishList;
 
   dishList.forEach(dish => {
     const availBadge = dish.isAvailable ? "bg-success" : "bg-secondary";
@@ -144,8 +191,10 @@ async function renderMenuManagementTable() {
       <td>${dish.category}</td>
       <td>₹${dish.price}</td>
       <td>${dish.prepTime || '10 mins'}</td>
+      <td>${dish.stockQuantity != null ? dish.stockQuantity : '50'}</td>
       <td><span class="badge ${availBadge}">${availText}</span></td>
       <td>
+        <button type="button" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#addDishModal" onclick="openDishModalForEdit(${dish.id})">Edit</button>
         <button class="btn btn-sm btn-outline-warning me-1" onclick="toggleDishAvailability(${dish.id}, ${!dish.isAvailable})">Toggle Status</button>
       </td>
     `;
@@ -160,7 +209,7 @@ async function toggleDishAvailability(dishId, status) {
     formData.append("dishId", dishId);
     formData.append("available", status);
 
-    const res = await fetch("/canteen/dish", {
+    const res = await fetch(getApiUrl("/dish"), {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: formData.toString()
@@ -182,19 +231,38 @@ async function toggleDishAvailability(dishId, status) {
 
 async function handleAddDish(event) {
   event.preventDefault();
+  const dishId = document.getElementById("dishId").value;
   const name = document.getElementById("dishName").value;
   const category = document.getElementById("dishCategory").value;
   const price = document.getElementById("dishPrice").value;
+  const prepTime = document.getElementById("dishPrepTime").value;
   const description = document.getElementById("dishDesc")?.value || "";
+  const ingredients = document.getElementById("dishIngredients")?.value || "";
+  const allergens = document.getElementById("dishAllergens")?.value || "";
+  const nutrition = document.getElementById("dishNutrition")?.value || "";
+  const stockQuantity = document.getElementById("dishStockQuantity")?.value || "50";
+  const servingWindow = document.getElementById("dishServingWindow")?.value || "All Day";
+  const imageUrl = document.getElementById("dishImageUrl")?.value || "";
+
+  const action = dishId ? "updateDish" : "addDish";
 
   try {
     const formData = new URLSearchParams();
+    formData.append("action", action === "updateDish" ? "updateDish" : "addDish");
+    if (dishId) formData.append("dishId", dishId);
     formData.append("name", name);
     formData.append("category", category);
     formData.append("price", price);
     formData.append("description", description);
+    formData.append("prepTime", prepTime);
+    formData.append("ingredients", ingredients);
+    formData.append("allergens", allergens);
+    formData.append("nutrition", nutrition);
+    formData.append("servingWindow", servingWindow);
+    formData.append("stockQuantity", stockQuantity);
+    if (imageUrl) formData.append("imageUrl", imageUrl);
 
-    const res = await fetch("/canteen/dish", {
+    const res = await fetch(getApiUrl("/dish"), {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: formData.toString()
@@ -204,18 +272,48 @@ async function handleAddDish(event) {
     if (res.ok && data.status === "success") {
       showNotification(data.message, "success");
       renderMenuManagementTable();
+      const addDishModalEl = document.getElementById("addDishModal");
+      if (addDishModalEl) {
+        const addDishModal = bootstrap.Modal.getInstance(addDishModalEl) || new bootstrap.Modal(addDishModalEl);
+        addDishModal.hide();
+      }
+      document.getElementById("addDishForm")?.reset();
+      document.getElementById("dishId").value = "";
       return;
     }
   } catch (e) {
     console.warn("Backend add dish unavailable, simulating locally:", e);
   }
 
-  dishes.push({
-    id: dishes.length + 1,
-    name, category, price: parseFloat(price),
-    description, prepTime: "10 mins", isAvailable: true, image: "assets/images/burger.jpg"
-  });
-  showNotification(`[Simulation] Dish "${name}" added to menu!`, "info");
+  const updatedDish = {
+    id: dishId ? parseInt(dishId, 10) : dishes.length + 1,
+    name,
+    category,
+    price: parseFloat(price),
+    description,
+    prepTime: prepTime || "10 mins",
+    ingredients,
+    allergens,
+    nutrition,
+    servingWindow,
+    stockQuantity: parseInt(stockQuantity, 10),
+    isAvailable: true,
+    image: imageUrl || "assets/images/burger.jpg"
+  };
+
+  if (dishId) {
+    const existingIndex = dishes.findIndex(item => item.id === updatedDish.id);
+    if (existingIndex !== -1) {
+      dishes[existingIndex] = { ...dishes[existingIndex], ...updatedDish };
+      showNotification(`[Simulation] Dish "${name}" updated successfully!`, "info");
+    } else {
+      dishes.push(updatedDish);
+      showNotification(`[Simulation] Dish "${name}" added to menu!`, "info");
+    }
+  } else {
+    dishes.push(updatedDish);
+    showNotification(`[Simulation] Dish "${name}" added to menu!`, "info");
+  }
   renderMenuManagementTable();
 }
 

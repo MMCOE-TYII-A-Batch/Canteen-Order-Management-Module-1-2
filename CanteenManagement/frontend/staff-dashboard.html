@@ -25,11 +25,15 @@
 
       <div class="collapse navbar-collapse" id="staffNav">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link active" href="staff-dashboard.html">Staff Dashboard</a></li>
+          <!-- <li class="nav-item"><a class="nav-link active" href="staff-dashboard.html">Staff Dashboard</a></li> -->
           <li class="nav-item"><a class="nav-link" href="menu.html">View Menu</a></li>
         </ul>
         <div class="d-flex align-items-center gap-2">
-          <span class="text-light me-2"><i class="bi bi-person-workspace text-warning me-1"></i> <span id="staffNavName">Staff Portal</span></span>
+          <a id="profileLink" href="profile.html" class="btn btn-outline-warning btn-sm d-flex align-items-center gap-1">
+            <i class="bi bi-person-circle fs-6"></i>
+            <span>Profile</span>
+          </a>
+          <!-- <span class="text-light me-2"><i class="bi bi-person-workspace text-warning me-1"></i> <span id="staffNavName">Staff Portal</span></span> -->
           <a href="login.html" class="btn btn-outline-light btn-sm" onclick="localStorage.clear(); sessionStorage.clear();">Logout</a>
         </div>
       </div>
