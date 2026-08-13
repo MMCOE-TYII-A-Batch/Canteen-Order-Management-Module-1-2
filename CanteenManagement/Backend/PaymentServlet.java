@@ -66,6 +66,7 @@ public class PaymentServlet extends HttpServlet {
             String orderIdStr = request.getParameter("orderId");
             String method = request.getParameter("method") == null ? "UPI" : request.getParameter("method");
             String amountStr = request.getParameter("amount");
+            String deliveryAddress = request.getParameter("deliveryAddress");
 
             if (orderIdStr == null || amountStr == null) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -80,10 +81,22 @@ public class PaymentServlet extends HttpServlet {
                 return;
             }
             try {
+                int orderId = Integer.parseInt(orderIdStr);
+                
+                // Update order with delivery address if provided
+                if (deliveryAddress != null && !deliveryAddress.trim().isEmpty()) {
+                    String updateOrderSql = "UPDATE orders SET delivery_address = ? WHERE order_id = ?";
+                    try (PreparedStatement psUpdate = conn.prepareStatement(updateOrderSql)) {
+                        psUpdate.setString(1, deliveryAddress.trim());
+                        psUpdate.setInt(2, orderId);
+                        psUpdate.executeUpdate();
+                    }
+                }
+                
                 String insertSql = "INSERT INTO payments (order_id, method, amount, currency, status, gateway_reference) VALUES (?, ?, ?, ?, 'PENDING', ?)";
                 String gatewayRef = "DUMMY-" + UUID.randomUUID().toString();
                 try (PreparedStatement ps = conn.prepareStatement(insertSql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-                    ps.setInt(1, Integer.parseInt(orderIdStr));
+                    ps.setInt(1, orderId);
                     ps.setString(2, method);
                     ps.setDouble(3, Double.parseDouble(amountStr));
                     ps.setString(4, "INR");
@@ -111,6 +124,8 @@ public class PaymentServlet extends HttpServlet {
             // Simulated gateway callback: update payment and order payment status
             String paymentIdStr = request.getParameter("paymentId");
             String result = request.getParameter("result"); // success | failed
+            String deliveryAddress = request.getParameter("deliveryAddress");
+            
             if (paymentIdStr == null || result == null) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 out.print("{\"status\":\"error\",\"message\":\"paymentId and result required\"}");
@@ -153,10 +168,19 @@ public class PaymentServlet extends HttpServlet {
 
                 // Update order payment status in orders table (if exists)
                 try {
-                    String orderUpd = "UPDATE orders SET payment_status = ? WHERE order_id = ?";
+                    String orderUpd = "UPDATE orders SET payment_status = ?";
+                    if (deliveryAddress != null && !deliveryAddress.trim().isEmpty()) {
+                        orderUpd += ", delivery_address = ?";
+                    }
+                    orderUpd += " WHERE order_id = ?";
+                    
                     try (PreparedStatement ps3 = conn.prepareStatement(orderUpd)) {
-                        ps3.setString(1, newStatus);
-                        ps3.setInt(2, orderId);
+                        int paramIndex = 1;
+                        ps3.setString(paramIndex++, newStatus);
+                        if (deliveryAddress != null && !deliveryAddress.trim().isEmpty()) {
+                            ps3.setString(paramIndex++, deliveryAddress.trim());
+                        }
+                        ps3.setInt(paramIndex, orderId);
                         ps3.executeUpdate();
                     }
                 } catch (SQLException ex) {
