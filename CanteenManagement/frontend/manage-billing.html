@@ -11,10 +11,29 @@
   <body>
     <nav class="navbar navbar-expand-lg canteen-navbar navbar-dark">
       <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="index.html">
+        <a class="navbar-brand d-flex align-items-center fw-bold" href="index.html">
           <i class="bi bi-cup-hot-fill me-2 fs-3 text-warning"></i>
           <span>Campus Canteen</span>
         </a>
+
+        <button class="navbar-toggler border-warning" type="button" data-bs-toggle="collapse" data-bs-target="#manageBillingNav" aria-controls="manageBillingNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="manageBillingNav">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link" href="manage-users.html">Manage Users</a></li>
+            <li class="nav-item"><a class="nav-link" href="manage-menu.html">Manage Menu</a></li>
+            <li class="nav-item"><a class="nav-link active" href="manage-billing.html">Manage Billing</a></li>
+          </ul>
+          <div class="d-flex align-items-center gap-2 ms-lg-3 mt-2 mt-lg-0">
+            <a id="profileLink" href="profile.html" class="btn btn-outline-warning btn-sm d-flex align-items-center gap-1">
+              <i class="bi bi-person-circle fs-6"></i>
+              <span>Profile</span>
+            </a>
+            <a href="login.html" class="btn btn-outline-light btn-sm">Logout</a>
+          </div>
+        </div>
       </div>
     </nav>
 
