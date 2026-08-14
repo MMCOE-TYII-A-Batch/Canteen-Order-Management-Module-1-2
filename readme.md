@@ -17,3 +17,16 @@ Functional requirements
 * The system shall support recommended dishes, special dishes, discounts, combo offers, and time-based availability. COMPLETED
 * The system shall automatically mark items unavailable when linked stock is insufficient. COMPLETED
 * The system shall allow sorting and searching by category, keyword, price, popularity, and availability, reflecting common canteen UI requirements for category navigation and price or sales sorting. COMPLETED
+
+3) Order management
+Functional requirements
+* The system shall allow customers to add one or more items to a cart and modify quantity before checkout. COMPLETED
+* The system shall support order types such as dine-in, takeaway, counter pickup, and workstation or hostel delivery, where applicable. COMPLETED
+* The system shall capture delivery location or pickup counter and selected service time.COMPLETED
+* The system shall validate item availability, quantity limits, pricing, taxes, offers, and cutoff times before order confirmation. COMPLETED
+* The system shall generate a unique order number for each confirmed order. COMPLETED
+* The system shall send confirmed orders in real time to the kitchen or merchant console. COMPLETED
+* The system shall track statuses such as placed, accepted, in preparation, ready, out for delivery, delivered, completed, cancelled, and refunded. COMPLETED
+* The system shall allow users and staff to search and filter orders by date, user, status, counter, and order number. COMPLETED
+* The system shall support order cancellation, partial cancellation before preparation, and refund initiation based on policy. COMPLETED
+* The system shall generate electronic receipts or order vouchers. COMPLETED
