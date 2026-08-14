@@ -30,3 +30,13 @@ Functional requirements
 * The system shall allow users and staff to search and filter orders by date, user, status, counter, and order number. COMPLETED
 * The system shall support order cancellation, partial cancellation before preparation, and refund initiation based on policy. COMPLETED
 * The system shall generate electronic receipts or order vouchers. COMPLETED
+
+4)Payment and billing
+* The system shall support multiple payment methods such as UPI, cards, wallets, cash, payroll deduction, campus card, or institution-approved gateways.
+* The system shall calculate subtotal, taxes, service charges, discounts, coupon value, and final payable amount. COMPLETED
+* The system shall integrate with external payment gateways and capture payment callback status. PENDING
+* The system shall update the order payment status after successful payment confirmation. COMPLETED
+* The system shall support pending, paid, failed, refunded, and partially refunded billing states. PENDING
+* The system shall generate tax invoices, payment receipts, and settlement summaries. PENDING
+* The system shall allow authorized staff to record cash payments and manual adjustments. PENDING
+* The system shall support refund workflows with reason capture and approval, where applicable. PENDING
