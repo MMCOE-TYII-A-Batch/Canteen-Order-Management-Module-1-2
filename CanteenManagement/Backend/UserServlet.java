@@ -20,9 +20,21 @@ import jakarta.servlet.http.HttpServletResponse;
 public class UserServlet extends HttpServlet {
 
     @Override
+    protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        setCorsHeaders(response);
+        response.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    private void setCorsHeaders(HttpServletResponse response) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    }
+
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
+        setCorsHeaders(response);
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
 
@@ -124,12 +136,70 @@ public class UserServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
+        setCorsHeaders(response);
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
 
         String action = request.getParameter("action");
         String userIdStr = request.getParameter("userId");
+
+        if ("verifyEmail".equalsIgnoreCase(action)) {
+            String email = request.getParameter("email");
+            if (email == null || email.trim().isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"status\":\"error\",\"message\":\"Email is required\"}");
+                return;
+            }
+
+            String sql = "SELECT user_id FROM users WHERE email = ?";
+            try (Connection conn = DBConnection.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, email.trim().toLowerCase());
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    out.print("{\"status\":\"success\",\"message\":\"Email found. You can reset your password.\"}");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    out.print("{\"status\":\"error\",\"message\":\"Email not found. Please register first.\"}");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                out.print("{\"status\":\"error\",\"message\":\"Database error verifying email.\"}");
+            }
+            return;
+        }
+
+        if ("resetPassword".equalsIgnoreCase(action)) {
+            String email = request.getParameter("email");
+            String newPassword = request.getParameter("newPassword");
+
+            if (email == null || email.trim().isEmpty() || newPassword == null || newPassword.trim().isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"status\":\"error\",\"message\":\"Email and new password are required.\"}");
+                return;
+            }
+
+            String updateSql = "UPDATE users SET password = ? WHERE email = ?";
+            try (Connection conn = DBConnection.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(updateSql)) {
+                ps.setString(1, PasswordUtil.hashPassword(newPassword.trim()));
+                ps.setString(2, email.trim().toLowerCase());
+                int updated = ps.executeUpdate();
+                if (updated > 0) {
+                    writeAuditLog(conn, 0, "PASSWORD_RESET", "Password reset for email: " + email.trim().toLowerCase());
+                    out.print("{\"status\":\"success\",\"message\":\"Password updated successfully.\"}");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    out.print("{\"status\":\"error\",\"message\":\"No user found with that email.\"}");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                out.print("{\"status\":\"error\",\"message\":\"Database error resetting password.\"}");
+            }
+            return;
+        }
 
         if (userIdStr == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

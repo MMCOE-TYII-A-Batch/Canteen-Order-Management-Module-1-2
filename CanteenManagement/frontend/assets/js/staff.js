@@ -30,9 +30,17 @@ function loadStaffUserProfile() {
   }
 }
 
+function getOrderApiUrl(queryString = "") {
+  const contextPath = "/canteen";
+  if (window.location.origin.startsWith("file:") || window.location.port !== "8080") {
+    return `http://localhost:8080${contextPath}/order${queryString}`;
+  }
+  return `${window.location.origin}${contextPath}/order${queryString}`;
+}
+
 async function fetchStaffOrders() {
   try {
-    const response = await fetch("/canteen/order");
+    const response = await fetch(getOrderApiUrl());
     if (response.ok) {
       const allOrders = await response.json();
       renderKitchenOrdersFromData(allOrders);
@@ -163,7 +171,7 @@ async function changeOrderStatus(orderId, newStatus) {
     formData.append("orderId", orderId);
     formData.append("newStatus", newStatus);
 
-    const response = await fetch("/canteen/order", {
+    const response = await fetch(getOrderApiUrl(), {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: formData.toString()

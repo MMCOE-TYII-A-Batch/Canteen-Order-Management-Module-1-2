@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Billing Management - Campus Canteen</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg canteen-navbar navbar-dark">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center fw-bold" href="index.html">
+          <i class="bi bi-cup-hot-fill me-2 fs-3 text-warning"></i>
+          <span>Campus Canteen</span>
+        </a>
+
+        <button class="navbar-toggler border-warning" type="button" data-bs-toggle="collapse" data-bs-target="#manageBillingNav" aria-controls="manageBillingNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="manageBillingNav">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link" href="manage-users.html">Manage Users</a></li>
+            <li class="nav-item"><a class="nav-link" href="manage-menu.html">Manage Menu</a></li>
+            <li class="nav-item"><a class="nav-link active" href="manage-billing.html">Manage Billing</a></li>
+          </ul>
+          <div class="d-flex align-items-center gap-2 ms-lg-3 mt-2 mt-lg-0">
+            <a id="profileLink" href="profile.html" class="btn btn-outline-warning btn-sm d-flex align-items-center gap-1">
+              <i class="bi bi-person-circle fs-6"></i>
+              <span>Profile</span>
+            </a>
+            <a href="login.html" class="btn btn-outline-light btn-sm">Logout</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container my-5">
+      <h3>Payments</h3>
+      <div class="card p-3 mb-4">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Order</th>
+              <th>Method</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="paymentsTableBody"></tbody>
+        </table>
+      </div>
+
+      <h4>Refunds</h4>
+      <div id="refundResult" class="mb-3"></div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/payments.js"></script>
+  </body>
+</html>

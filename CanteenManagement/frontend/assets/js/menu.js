@@ -9,10 +9,11 @@ let liveDishes = [];
 let currentCategory = "All";
 
 function getDishApiUrl(queryString = "") {
+  const contextPath = "/canteen";
   if (window.location.origin.startsWith("file:") || window.location.port !== "8080") {
-    return "http://localhost:8080/canteen/dish" + queryString;
+    return `http://localhost:8080${contextPath}/dish${queryString}`;
   }
-  return "/canteen/dish" + queryString;
+  return `${window.location.origin}${contextPath}/dish${queryString}`;
 }
 
 function getMenuContainer() {
@@ -24,6 +25,13 @@ async function fetchDishesFromBackend(category = "All", sortBy = "") {
   const container = getMenuContainer();
   if (!container) return;
 
+  container.innerHTML = `
+    <div class="col-12 text-center py-5">
+      <div class="spinner-border text-warning" role="status"><span class="visually-hidden">Loading...</span></div>
+      <p class="mt-3 mb-0 text-secondary">Loading menu items from the canteen kitchen...</p>
+    </div>
+  `;
+
   try {
     const apiUrl = getDishApiUrl(`?category=${encodeURIComponent(category)}&sortBy=${sortBy}`);
     const response = await fetch(apiUrl);
@@ -32,14 +40,22 @@ async function fetchDishesFromBackend(category = "All", sortBy = "") {
       renderMenuCards(liveDishes);
       return;
     }
+    renderMenuError("Unable to load menu items. Please refresh the page.");
   } catch (err) {
-    console.warn("Backend unavailable, using client-side dishes fallback:", err);
+    console.warn("Backend unavailable for dish fetch:", err);
+    renderMenuError("Unable to connect to the menu service. Please try again later.");
   }
+}
 
-  // Fallback mock dishes dataset from main.js
-  const fallbackList = (typeof dishes !== "undefined") ? dishes : [];
-  const filtered = category === "All" ? fallbackList : fallbackList.filter(d => d.category === category);
-  renderMenuCards(filtered);
+function renderMenuError(message) {
+  const container = getMenuContainer();
+  if (!container) return;
+  container.innerHTML = `
+    <div class="col-12 text-center py-5 text-danger">
+      <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+      <p class="mt-3 mb-0">${message}</p>
+    </div>
+  `;
 }
 
 function renderMenuCards(items) {
@@ -85,7 +101,7 @@ function renderMenuCards(items) {
             <span class="text-muted small"><i class="bi bi-clock"></i> ${dish.prepTime || '10 mins'}</span>
             ${isOut ? 
               '<button class="btn btn-sm btn-secondary" disabled>Unavailable</button>' : 
-              `<button class="btn btn-sm btn-canteen-primary" onclick="placeOrder('${dish.name.replace(/'/g, "\\'")}', ${dish.price}, ${dish.id}, '${(dish.category || 'Canteen Special').replace(/'/g, "\\'")}', '${(dish.description || '').replace(/'/g, "\\'")}')"><i class="bi bi-cart-plus"></i> Order Now</button>`
+              `<button class="btn btn-sm btn-canteen-primary" onclick="addCartItem('${dish.name.replace(/'/g, "\\'")}', ${dish.price}, ${dish.id}, '${(dish.category || 'Canteen Special').replace(/'/g, "\\'")}', '${(dish.description || '').replace(/'/g, "\\'")}')"><i class="bi bi-cart-plus"></i> Add ₹${dish.price}</button>`
             }
           </div>
         </div>
@@ -95,7 +111,7 @@ function renderMenuCards(items) {
   });
 }
 
-function filterMenuCategory(category) {
+function filterMenuCategory(category, event) {
   document.querySelectorAll(".category-btn").forEach(btn => btn.classList.remove("active"));
   if (event && event.target) event.target.classList.add("active");
   fetchDishesFromBackend(category);

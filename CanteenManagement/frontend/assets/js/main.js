@@ -108,12 +108,255 @@ const orders = [
   { id: 105, studentName: "Rahul Sharma", items: "Cold Coffee x 2", total: 100, status: "Delivered", date: "2026-08-06 12:15 PM" }
 ];
 
-// --------------------------------------------------------------------------
-// 2. HELPER & NAVBAR SESSION FUNCTIONS
-// --------------------------------------------------------------------------
+let cartItems = JSON.parse(localStorage.getItem("canteen_cart") || "[]");
 
-function showNotification(message, type = "info") {
-  alert(`[${type.toUpperCase()}] ${message}`);
+function saveCartItems() {
+  localStorage.setItem("canteen_cart", JSON.stringify(cartItems));
+  updateCartCount();
+}
+
+function updateCartBadge() {
+  const cartBadge = document.getElementById("cart-count");
+  if (!cartBadge) return;
+  const totalQty = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  cartBadge.textContent = totalQty.toString();
+}
+
+function addCartItem(name, price, dishId = 0, category = "Snacks", description = "") {
+  const unitPrice = Number(price) || 0;
+  const existing = cartItems.find(item => item.dishId === dishId && item.name === name);
+  if (existing) {
+    existing.quantity = (existing.quantity || 0) + 1;
+  } else {
+    cartItems.push({ dishId, name, price: unitPrice, quantity: 1, category, description });
+  }
+  saveCartItems();
+  showNotification(`Added ${name} to cart`, "success");
+}
+
+function removeCartItem(index) {
+  if (index < 0 || index >= cartItems.length) return;
+  cartItems.splice(index, 1);
+  saveCartItems();
+  renderCartModal();
+}
+
+function changeCartItemQuantity(index, delta) {
+  const item = cartItems[index];
+  if (!item) return;
+  item.quantity = Math.max(1, (item.quantity || 1) + delta);
+  if (item.quantity <= 0) {
+    cartItems.splice(index, 1);
+  }
+  saveCartItems();
+  renderCartModal();
+}
+
+function clearCartItems() {
+  cartItems = [];
+  saveCartItems();
+  renderCartModal();
+}
+
+async function checkoutCart() {
+  const user = getActiveUserSession();
+  if (!user) {
+    showNotification("Login first to place orders from cart.", "error");
+    window.location.href = "login.html";
+    return;
+  }
+
+  if (!cartItems.length) {
+    showNotification("Your cart is empty.", "error");
+    return;
+  }
+
+  const checkoutButton = document.getElementById("checkoutCartBtn");
+  if (checkoutButton) checkoutButton.disabled = true;
+
+  try {
+    // Create a single aggregate order for the cart, then redirect to payment
+    const totalAmount = cartItems.reduce((s, it) => s + ((it.price || 0) * (it.quantity || 1)), 0);
+    const totalQty = cartItems.reduce((s, it) => s + (it.quantity || 0), 0) || 1;
+    const firstDishId = cartItems[0]?.dishId || 0;
+
+    // Save cart snapshot for later reference (receipt)
+    localStorage.setItem('pending_cart', JSON.stringify(cartItems));
+
+    const formData = new URLSearchParams();
+    formData.append("userId", user.userId || user.id || 1);
+    formData.append("dishId", firstDishId);
+    formData.append("quantity", totalQty);
+    formData.append("total", totalAmount);
+
+    try {
+      const response = await fetch(getOrderApiUrl(), {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData.toString()
+      });
+      const data = await response.json();
+      if (response.ok && data.status === 'success') {
+        // redirect to payment to complete payment before confirming
+        // Cart will be cleared AFTER payment is successful (not here)
+        const orderId = data.orderId;
+        window.location.href = `payment.html?orderId=${orderId}`;
+        return;
+      } else {
+        showNotification('Failed to create order for payment. Try again.', 'error');
+      }
+    } catch (err) {
+      console.error('Failed to create order for payment:', err);
+      showNotification('Unable to reach order API. Try again later.', 'error');
+    }
+  } catch (e) {
+    console.error("Cart checkout error:", e);
+    showNotification("Checkout failed. Please try again later.", "error");
+  } finally {
+    if (checkoutButton) checkoutButton.disabled = false;
+  }
+}
+
+function ensureCartModalExists() {
+  if (document.getElementById("cartModal")) return;
+
+  const modalHtml = `
+    <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="cartModalLabel"><i class="bi bi-cart3 me-2"></i>My Cart</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="cartModalBody"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Continue Shopping</button>
+            <button type="button" id="checkoutCartBtn" class="btn btn-canteen-primary">Place Order</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+  document.getElementById("checkoutCartBtn")?.addEventListener("click", checkoutCart);
+}
+
+function renderCartModal() {
+  ensureCartModalExists();
+  const body = document.getElementById("cartModalBody");
+  if (!body) return;
+
+  if (!cartItems.length) {
+    body.innerHTML = `
+      <div class="text-center py-5">
+        <i class="bi bi-cart-x fs-1 text-secondary"></i>
+        <p class="text-secondary mt-3 mb-0">Your cart is empty. Add items from the menu first.</p>
+      </div>
+    `;
+    return;
+  }
+
+  let totalAmount = 0;
+  const rows = cartItems.map((item, index) => {
+    const unitPrice = Number(item.price) || 0;
+    const itemTotal = unitPrice * (item.quantity || 1);
+    totalAmount += itemTotal;
+    return `
+      <tr>
+        <td>${item.name}</td>
+        <td>₹${unitPrice.toFixed(2)}</td>
+        <td>
+          <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="changeCartItemQuantity(${index}, -1)">-</button>
+            <span>${item.quantity}</span>
+            <button class="btn btn-sm btn-outline-secondary" onclick="changeCartItemQuantity(${index}, 1)">+</button>
+          </div>
+        </td>
+        <td>₹${itemTotal.toFixed(2)}</td>
+        <td><button class="btn btn-sm btn-outline-danger" onclick="removeCartItem(${index})"><i class="bi bi-trash"></i></button></td>
+      </tr>
+    `;
+  }).join("");
+
+  body.innerHTML = `
+    <div class="table-responsive">
+      <table class="table align-middle mb-3">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Unit Price</th>
+            <th>Qty</th>
+            <th>Subtotal</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <button class="btn btn-outline-danger" onclick="clearCartItems()">Clear Cart</button>
+      <div class="text-end">
+        <p class="mb-1 text-secondary">Items: ${cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0)}</p>
+        <h5 class="mb-0">Total: ₹${totalAmount.toFixed(2)}</h5>
+      </div>
+    </div>
+  `;
+}
+
+function openCartModal() {
+  ensureCartModalExists();
+  renderCartModal();
+  const modalElem = document.getElementById("cartModal");
+  const bsModal = bootstrap.Modal.getOrCreateInstance(modalElem);
+  bsModal.show();
+}
+
+function ensureToastContainer() {
+  if (document.getElementById('cpToastContainer')) return;
+  const container = document.createElement('div');
+  container.id = 'cpToastContainer';
+  container.className = 'cp-toast-container';
+  document.body.appendChild(container);
+}
+
+function showNotification(message, type = 'info', opts = {}) {
+  ensureToastContainer();
+  const container = document.getElementById('cpToastContainer');
+  const toast = document.createElement('div');
+  toast.className = `cp-toast cp-toast-${type}`;
+
+  const icons = {
+    success: '✔',
+    error: '✖',
+    warning: '⚠',
+    info: 'ℹ'
+  };
+
+  const title = opts.title || (type === 'success' ? 'Success' : type === 'error' ? 'Error' : type === 'warning' ? 'Warning' : 'Info');
+
+  toast.innerHTML = `
+    <div class="cp-toast-left">${icons[type] || icons.info}</div>
+    <div class="cp-toast-body">
+      <div class="cp-toast-title">${title}</div>
+      <div class="cp-toast-message">${message}</div>
+    </div>
+    <button class="cp-toast-close" aria-label="Close">&times;</button>
+  `;
+
+  container.prepend(toast);
+
+  // close button
+  toast.querySelector('.cp-toast-close').addEventListener('click', () => {
+    toast.classList.add('cp-toast-hide');
+    setTimeout(() => toast.remove(), 350);
+  });
+
+  // auto dismiss
+  const delay = opts.duration || (type === 'error' ? 5000 : 3000);
+  setTimeout(() => {
+    toast.classList.add('cp-toast-hide');
+    setTimeout(() => toast.remove(), 350);
+  }, delay);
 }
 
 function getActiveUserSession() {
@@ -127,18 +370,182 @@ function getActiveUserSession() {
 }
 
 function getOrderApiUrl(queryString = "") {
+  const contextPath = "/canteen";
   if (window.location.origin.startsWith("file:") || window.location.port !== "8080") {
-    return "http://localhost:8080/canteen/order" + queryString;
+    return `http://localhost:8080${contextPath}/order${queryString}`;
   }
-  return "/canteen/order" + queryString;
+  return `${window.location.origin}${contextPath}/order${queryString}`;
+}
+
+function getUserApiUrl(queryString = "") {
+  const contextPath = "/canteen";
+  if (window.location.origin.startsWith("file:") || window.location.port !== "8080") {
+    return `http://localhost:8080${contextPath}/user${queryString}`;
+  }
+  return `${window.location.origin}${contextPath}/user${queryString}`;
 }
 
 function updateCartCount() {
-  const cartBadge = document.getElementById("cart-count");
-  if (cartBadge) {
-    let current = parseInt(cartBadge.textContent || "0", 10);
-    cartBadge.textContent = (current + 1).toString();
+  updateCartBadge();
+}
+
+function getActiveUserId() {
+  const user = getActiveUserSession();
+  if (!user) return null;
+  return user.userId || user.id || null;
+}
+
+async function fetchUserProfileData(userId) {
+  try {
+    const response = await fetch(getUserApiUrl(`?id=${encodeURIComponent(userId)}`));
+    if (!response.ok) throw new Error("Failed to fetch user profile");
+    return await response.json();
+  } catch (e) {
+    console.warn("Could not fetch user profile:", e);
+    return null;
   }
+}
+
+function setProfileFieldsEditable(editable) {
+  const editableSelectors = [
+    "#profileName",
+    "#profilePhone",
+    "#profileDepartment",
+    "#profileLocation"
+  ];
+  editableSelectors.forEach(selector => {
+    const field = document.querySelector(selector);
+    if (field) field.readOnly = !editable;
+  });
+
+  const editBtn = document.getElementById("editProfileBtn");
+  const saveBtn = document.getElementById("saveProfileBtn");
+  const cancelBtn = document.getElementById("cancelEditBtn");
+  if (editBtn) editBtn.classList.toggle("d-none", editable);
+  if (saveBtn) saveBtn.classList.toggle("d-none", !editable);
+  if (cancelBtn) cancelBtn.classList.toggle("d-none", !editable);
+}
+
+function populateProfileForm(userData) {
+  if (!userData) return;
+  const fields = {
+    profileName: userData.name || "",
+    profileEmail: userData.email || "",
+    profilePhone: userData.phone || "",
+    profileCollegeId: userData.college_id || userData.collegeId || "",
+    profileDepartment: userData.department || "",
+    profileLocation: userData.defaultLocation || userData.default_location || ""
+  };
+
+  Object.keys(fields).forEach(id => {
+    const element = document.getElementById(id);
+    if (element) element.value = fields[id];
+  });
+
+  const nameHeading = document.getElementById("profileUserName");
+  const roleBadge = document.getElementById("profileUserRole");
+  const departmentText = document.getElementById("profileUserDepartment");
+  if (nameHeading) nameHeading.textContent = userData.name || "User Profile";
+  if (roleBadge) roleBadge.textContent = userData.role || "Student Account";
+  if (departmentText) departmentText.textContent = userData.department || "Department of Computer Engineering";
+}
+
+async function saveProfileChanges() {
+  const userId = getActiveUserId();
+  if (!userId) {
+    showNotification("Please login again before saving.", "error");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const name = document.getElementById("profileName")?.value.trim();
+  const phone = document.getElementById("profilePhone")?.value.trim();
+  const department = document.getElementById("profileDepartment")?.value.trim();
+  const location = document.getElementById("profileLocation")?.value.trim();
+
+  if (!name || !phone || !department) {
+    showNotification("Please fill in all required fields.", "error");
+    return;
+  }
+
+  try {
+    const formData = new URLSearchParams();
+    formData.append("action", "updateProfile");
+    formData.append("userId", userId);
+    formData.append("name", name);
+    formData.append("phone", phone);
+    formData.append("department", department);
+    formData.append("dietaryPreferences", "None");
+    formData.append("defaultLocation", location || "Main Canteen Counter");
+
+    const response = await fetch(getUserApiUrl(), {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData.toString()
+    });
+
+    const result = await response.json();
+    if (response.ok && result.status === "success") {
+      showNotification(result.message, "success");
+      setProfileFieldsEditable(false);
+      const user = getActiveUserSession();
+      if (user) {
+        user.name = name;
+        localStorage.setItem("user", JSON.stringify(user));
+        sessionStorage.setItem("user", JSON.stringify(user));
+      }
+      renderGlobalNavbarSession();
+    } else {
+      showNotification(result.message || "Failed to save profile.", "error");
+    }
+  } catch (e) {
+    console.error(e);
+    showNotification("Unable to save profile. Try again later.", "error");
+  }
+}
+
+function cancelProfileEdit() {
+  setProfileFieldsEditable(false);
+  const userId = getActiveUserId();
+  if (userId) {
+    fetchUserProfileData(userId).then(populateProfileForm);
+  }
+}
+
+function logoutUser() {
+  localStorage.removeItem("user");
+  sessionStorage.removeItem("user");
+  window.location.href = "login.html";
+}
+
+async function renderProfilePage() {
+  const user = getActiveUserSession();
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const userId = getActiveUserId();
+  if (userId) {
+    const profileData = await fetchUserProfileData(userId);
+    if (profileData) {
+      populateProfileForm(profileData);
+    } else {
+      populateProfileForm(user);
+    }
+  }
+
+  setProfileFieldsEditable(false);
+
+  const editBtn = document.getElementById("editProfileBtn");
+  const saveBtn = document.getElementById("saveProfileBtn");
+  const cancelBtn = document.getElementById("cancelEditBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  if (editBtn) editBtn.addEventListener("click", () => setProfileFieldsEditable(true));
+  if (saveBtn) saveBtn.addEventListener("click", saveProfileChanges);
+  if (cancelBtn) cancelBtn.addEventListener("click", cancelProfileEdit);
+  if (logoutBtn) logoutBtn.addEventListener("click", logoutUser);
 }
 
 // Global Order State for Confirmation Modal
@@ -322,63 +729,27 @@ async function submitModalOrder() {
   }
 
   if (!createdOrderId) {
+    // Fallback local id
     createdOrderId = 100 + (typeof orders !== "undefined" ? orders.length : 0) + Math.floor(Math.random() * 10) + 1;
   }
 
-  const formattedDate = new Date().toLocaleString('en-US', {
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', hour12: true
-  });
-
-  const newOrderObj = {
-    id: createdOrderId,
-    userId: user.userId || user.id || 1,
-    studentName: user.name || "Rahul Sharma",
-    items: `${activeOrderData.dishName} x ${qty}`,
-    total: total,
-    status: "New",
-    date: formattedDate,
-    notes: notes,
-    paymentMethod: paymentMethod
-  };
-
-  // 1. Save to Local Storage for persistent order history across pages
-  const savedLocalOrders = JSON.parse(localStorage.getItem("local_user_orders") || "[]");
-  savedLocalOrders.unshift(newOrderObj);
-  localStorage.setItem("local_user_orders", JSON.stringify(savedLocalOrders));
-
-  // 2. Unshift into in-memory orders array
-  if (typeof orders !== "undefined") {
-    orders.unshift(newOrderObj);
-  }
-
-  // 3. Update Navbar cart counter
-  updateCartCount(qty);
-
-  // 4. Close confirmation modal
+  // Close confirmation modal
   const confirmModalElem = document.getElementById("orderConfirmationModal");
   const bsConfirmModal = bootstrap.Modal.getInstance(confirmModalElem);
   if (bsConfirmModal) bsConfirmModal.hide();
 
   if (confirmBtn) confirmBtn.disabled = false;
 
-  // 5. Refresh Order History table if on student-dashboard
-  if (typeof fetchStudentOrders === "function") {
-    fetchStudentOrders();
-  }
+  // Save pending single-order snapshot so payment page can show items
+  const pending = [{ name: activeOrderData.dishName, quantity: activeOrderData.quantity, price: activeOrderData.price }];
+  localStorage.setItem('pending_cart', JSON.stringify(pending));
 
-  // 6. Show Success Dialog
-  document.getElementById("successModalBodyText").innerHTML = `
-    <strong>Order #${newOrderObj.id}</strong> placed for <strong>${activeOrderData.dishName} (x${qty})</strong>.<br>
-    Total Amount: <span class="fw-bold text-success">₹${total}</span>
-  `;
-  const successModalElem = document.getElementById("orderSuccessModal");
-  const bsSuccessModal = bootstrap.Modal.getOrCreateInstance(successModalElem);
-  bsSuccessModal.show();
+  // Redirect to payment page to complete payment before showing success
+  window.location.href = `payment.html?orderId=${createdOrderId}`;
 }
 
 function addToCartMock(dishName, price, dishId = 1) {
-  placeOrder(dishName, price, dishId);
+  addCartItem(dishName, price, dishId, 'Canteen Special', 'Added from homepage special feature.');
 }
 
 /**
@@ -425,27 +796,39 @@ function renderGlobalNavbarSession() {
       }
     }
 
-    // 2. Replace static Login button with User Profile dropdown
-    const rightNavContainer = document.querySelector(".navbar .d-flex.align-items-center");
-    if (rightNavContainer) {
-      const loginBtn = rightNavContainer.querySelector("a[href='login.html']");
-      if (loginBtn) {
-        loginBtn.outerHTML = `
-          <div class="dropdown d-inline-block ms-2">
-            <button class="btn btn-outline-warning btn-sm dropdown-toggle d-flex align-items-center gap-1 fw-semibold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="bi bi-person-circle fs-6"></i>
-              <span>${user.name}</span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow">
-              <li><h6 class="dropdown-header text-truncate">Role: ${user.role || 'User'}</h6></li>
-              <li><a class="dropdown-item fw-bold text-dark" href="${dashboardPage}"><i class="bi bi-speedometer2 me-2 text-warning"></i>Dashboard</a></li>
-              <li><a class="dropdown-item" href="profile.html"><i class="bi bi-person me-2"></i>My Profile</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-danger" href="login.html" onclick="localStorage.clear(); sessionStorage.clear();"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-            </ul>
-          </div>
-        `;
-      }
+    // 2. Replace static Login/Register buttons with Profile button when user is logged in
+    const loginBtn = document.getElementById("loginLink");
+    const registerBtn = document.getElementById("registerLink");
+    const authButtons = document.getElementById("authButtons");
+
+    if (registerBtn) {
+      registerBtn.style.display = "none";
+    }
+
+    if (loginBtn && authButtons) {
+      loginBtn.outerHTML = `
+        <a id="profileLink" href="profile.html" class="btn btn-outline-warning btn-sm d-flex align-items-center gap-1">
+          <i class="bi bi-person-circle fs-6"></i>
+          <span>Profile</span>
+        </a>
+      `;
+    }
+
+    if (!loginBtn && authButtons && !document.getElementById("profileLink")) {
+      const profileLink = document.createElement("a");
+      profileLink.id = "profileLink";
+      profileLink.href = "profile.html";
+      profileLink.className = "btn btn-outline-warning btn-sm d-flex align-items-center gap-1";
+      profileLink.innerHTML = `<i class="bi bi-person-circle fs-6"></i><span>Profile</span>`;
+      authButtons.appendChild(profileLink);
+    }
+
+    if (registerBtn) {
+      registerBtn.style.display = "none";
+    }
+
+    if (loginBtn) {
+      loginBtn.style.display = "none";
     }
   } catch (e) {
     console.warn("Failed rendering global navbar session:", e);
@@ -463,9 +846,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  const cartBadge = document.getElementById("cart-count");
-  if (cartBadge) {
-    cartBadge.textContent = "0";
+  updateCartCount();
+
+  renderGlobalNavbarSession();
+  if (currentPath === "profile.html") {
+    renderProfilePage();
   }
 
   // Render role-specific navbar options on page load

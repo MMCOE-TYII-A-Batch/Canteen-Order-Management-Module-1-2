@@ -21,12 +21,16 @@
 
       <div class="collapse navbar-collapse" id="manageMenuNav">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="manager-dashboard.html">Dashboard</a></li>
+          <!-- <li class="nav-item"><a class="nav-link" href="manager-dashboard.html">Dashboard</a></li> -->
           <li class="nav-item"><a class="nav-link" href="manage-users.html">Manage Users</a></li>
           <li class="nav-item"><a class="nav-link active" href="manage-menu.html">Manage Menu</a></li>
           <li class="nav-item"><a class="nav-link" href="menu.html">Public Menu</a></li>
         </ul>
         <div class="d-flex align-items-center gap-2">
+          <a id="profileLink" href="profile.html" class="btn btn-outline-warning btn-sm d-flex align-items-center gap-1">
+            <i class="bi bi-person-circle fs-6"></i>
+            <span>Profile</span>
+          </a>
           <a href="login.html" class="btn btn-outline-light btn-sm">Logout</a>
         </div>
       </div>
@@ -41,7 +45,7 @@
         <h2 class="fw-bold text-dark mb-1">Canteen Dish Catalogue</h2>
         <p class="text-secondary mb-0">Add, Edit, Activate, Deactivate, or Delete food items from the live canteen menu</p>
       </div>
-      <button class="btn btn-canteen-primary" data-bs-toggle="modal" data-bs-target="#addDishModal">
+      <button class="btn btn-canteen-primary" type="button" onclick="openDishModalForAdd()" data-bs-toggle="modal" data-bs-target="#addDishModal">
         <i class="bi bi-plus-circle-fill me-1"></i> Add New Dish
       </button>
     </div>
@@ -76,11 +80,12 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content">
         <div class="modal-header bg-dark text-white">
-          <h5 class="modal-title text-warning fw-bold"><i class="bi bi-egg-fried me-2"></i>Add New Food Dish</h5>
+          <h5 class="modal-title text-warning fw-bold" id="dishModalTitle"><i class="bi bi-egg-fried me-2"></i>Add New Food Dish</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <form id="addDishForm">
+            <input type="hidden" id="dishId" value="">
             <div class="row g-3">
               
               <div class="col-md-6">
@@ -108,6 +113,36 @@
                 <input type="text" class="form-control" id="dishPrepTime" placeholder="10 mins" required>
               </div>
 
+              <div class="col-md-6">
+                <label for="dishStockQuantity" class="form-label fw-semibold">Stock Quantity</label>
+                <input type="number" class="form-control" id="dishStockQuantity" placeholder="50" min="0" value="50" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="dishIngredients" class="form-label fw-semibold">Ingredients</label>
+                <input type="text" class="form-control" id="dishIngredients" placeholder="Potato, Cheese, Lettuce" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="dishAllergens" class="form-label fw-semibold">Allergens</label>
+                <input type="text" class="form-control" id="dishAllergens" placeholder="Gluten, Dairy">
+              </div>
+
+              <div class="col-md-6">
+                <label for="dishNutrition" class="form-label fw-semibold">Nutrition</label>
+                <input type="text" class="form-control" id="dishNutrition" placeholder="350 kcal">
+              </div>
+
+              <div class="col-md-6">
+                <label for="dishServingWindow" class="form-label fw-semibold">Serving Window</label>
+                <input type="text" class="form-control" id="dishServingWindow" placeholder="All Day" value="All Day">
+              </div>
+
+              <div class="col-md-12">
+                <label for="dishImageUrl" class="form-label fw-semibold">Image URL</label>
+                <input type="text" class="form-control" id="dishImageUrl" placeholder="assets/images/your-dish.jpg">
+              </div>
+
               <div class="col-12">
                 <label for="dishDesc" class="form-label fw-semibold">Description</label>
                 <textarea class="form-control" id="dishDesc" rows="2" placeholder="Brief description of taste, ingredients, and serving style..." required></textarea>
@@ -117,7 +152,7 @@
 
             <div class="mt-4 d-flex justify-content-end gap-2">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button type="submit" class="btn btn-canteen-primary">Save Dish to Menu</button>
+              <button type="submit" class="btn btn-canteen-primary" id="dishModalSubmitBtn">Save Dish to Menu</button>
             </div>
           </form>
         </div>

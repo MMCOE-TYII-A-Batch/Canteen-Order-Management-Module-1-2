@@ -1,0 +1,7 @@
+**/node_modules
+**/.git
+**/.github
+**/*.log
+**/*.tmp
+**/.DS_Store
+WEB-INF/classes

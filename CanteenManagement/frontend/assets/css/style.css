@@ -288,6 +288,7 @@ main {
 .cp-toast-warning { border-left: 4px solid #ffc107; }
 .cp-toast-info { border-left: 4px solid #0d6efd; }
 
+<<<<<<< HEAD
 /* --------------------------------------------------------------------------
    Payment Methods Grid
    -------------------------------------------------------------------------- */
@@ -418,3 +419,5 @@ main {
   border: 1px solid #f0f0f0;
 }
 
+=======
+>>>>>>> be292adebc754027a701bd97c3cf876fe88ecac0
