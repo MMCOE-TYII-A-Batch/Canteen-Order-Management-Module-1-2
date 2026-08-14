@@ -178,6 +178,51 @@ main {
   color: var(--primary-yellow);
 }
 
+/* Management table styling */
+.table-responsive .table {
+  white-space: nowrap;
+  min-width: 1000px;
+}
+
+.table-responsive .table th,
+.table-responsive .table td {
+  padding: 0.75rem;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-responsive .table th {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.table-responsive .table tbody tr {
+  border-bottom: 1px solid #dee2e6;
+  transition: background-color 0.2s ease;
+}
+
+.table-responsive .table tbody tr:hover {
+  background-color: rgba(255, 193, 7, 0.05);
+}
+
+.table-responsive .table img {
+  border-radius: 4px;
+  max-width: 50px;
+  height: auto;
+}
+
+.table-responsive .table .badge {
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
+}
+
+.table-responsive .table .btn-sm {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.875rem;
+}
+
 .stat-card {
   border-left: 5px solid var(--primary-yellow);
 }
@@ -200,3 +245,176 @@ main {
 .canteen-footer a:hover {
   text-decoration: underline;
 }
+
+/* --------------------------------------------------------------------------
+   Toast / Popup Notifications
+   -------------------------------------------------------------------------- */
+.cp-toast-container {
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+.cp-toast {
+  min-width: 260px;
+  max-width: 380px;
+  background: #fff;
+  color: var(--dark-charcoal);
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  display: flex;
+  align-items: flex-start;
+  padding: 12px 12px 12px 12px;
+  gap: 10px;
+  pointer-events: auto;
+  transform: translateY(-10px);
+  opacity: 0;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+.cp-toast:not(.cp-toast-hide) { transform: translateY(0); opacity: 1; }
+.cp-toast-hide { transform: translateY(-8px); opacity: 0; }
+.cp-toast-left { font-size: 18px; margin-top: 4px; width: 28px; text-align: center; }
+.cp-toast-body { flex: 1; }
+.cp-toast-title { font-weight: 700; margin-bottom: 4px; font-size: 0.95rem; }
+.cp-toast-message { font-size: 0.9rem; color: #444; }
+.cp-toast-close { background: transparent; border: none; color: #777; font-size: 18px; cursor: pointer; padding: 4px; }
+
+.cp-toast-success { border-left: 4px solid #198754; }
+.cp-toast-error { border-left: 4px solid #dc3545; }
+.cp-toast-warning { border-left: 4px solid #ffc107; }
+.cp-toast-info { border-left: 4px solid #0d6efd; }
+
+/* --------------------------------------------------------------------------
+   Payment Methods Grid
+   -------------------------------------------------------------------------- */
+.payment-methods-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.payment-option {
+  position: relative;
+  margin-bottom: 0;
+}
+
+.payment-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.payment-option label {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  margin-bottom: 0;
+}
+
+.payment-option label:hover {
+  border-color: var(--primary-yellow);
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15);
+}
+
+.payment-option input[type="radio"]:checked + label {
+  border-color: var(--primary-yellow);
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.05) 100%);
+  box-shadow: 0 6px 16px rgba(255, 193, 7, 0.25);
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   SEARCH BAR & SORT FILTER STYLING
+   -------------------------------------------------------------------------- */
+
+/* Professional Input Group Styling */
+.input-group-lg .form-control {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.input-group-lg .form-control:focus {
+  border-color: var(--primary-yellow);
+  box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+
+.input-group-lg .input-group-text {
+  border: 2px solid #e0e0e0;
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  background-color: #ffffff;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.input-group-lg:focus-within .input-group-text {
+  border-color: var(--primary-yellow);
+  background-color: #fafafa;
+}
+
+/* Sort Dropdown Styling */
+.form-select-sm {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  background-color: #ffffff;
+  font-weight: 500;
+}
+
+.form-select-sm:focus {
+  border-color: var(--primary-yellow);
+  box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+
+.form-select-sm:hover {
+  border-color: var(--primary-yellow);
+}
+
+/* Category Button Styling */
+.category-btn {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1.5px solid #d0d0d0;
+}
+
+.category-btn.btn-outline-secondary {
+  color: #555;
+}
+
+.category-btn.btn-outline-secondary:hover {
+  background-color: #f5f5f5;
+  border-color: var(--primary-yellow);
+  color: var(--primary-yellow);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.category-btn.active {
+  background-color: var(--primary-yellow);
+  border-color: var(--primary-yellow);
+  color: #222;
+  font-weight: 600;
+}
+
+/* Card Container Enhancement */
+.card.custom-card {
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+  border: 1px solid #f0f0f0;
+}
+
