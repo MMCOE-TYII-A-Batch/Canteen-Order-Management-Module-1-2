@@ -4,8 +4,8 @@ Functional requirements
 * The system shall support secure login and logout for all registered users. COMPLETED
 * The system shall support role-based access control for customer, manager, kitchen staff, inventory staff, cashier, procurement staff, delivery staff, and administrator. COMPLETED
 * The system shall allow users to update profile data such as name, department, contact details, dietary preferences, and default pickup or delivery location. COMPLETED
-* The system shall allow users to view order history, invoices, complaints, and feedback status. COMPLETED (FEEDBACK PENDING)
-* The system shall allow administrators to activate, suspend, reset, or delete user accounts. COMPLETED (suspend)
+* The system shall allow users to view order history, invoices, complaints, and feedback status. COMPLETED 
+* The system shall allow administrators to activate, suspend, reset, or delete user accounts. COMPLETED 
 * The system shall maintain an audit trail of login, password reset, role assignment, and account status changes. COMPLETED
 
 2)Menu and dish management
@@ -32,11 +32,11 @@ Functional requirements
 * The system shall generate electronic receipts or order vouchers. COMPLETED
 
 4)Payment and billing
-* The system shall support multiple payment methods such as UPI, cards, wallets, cash, payroll deduction, campus card, or institution-approved gateways.
+* The system shall support multiple payment methods such as UPI, cards, wallets, cash, payroll deduction, campus card, or institution-approved gateways.COMPLETED
 * The system shall calculate subtotal, taxes, service charges, discounts, coupon value, and final payable amount. COMPLETED
 * The system shall integrate with external payment gateways and capture payment callback status. PENDING
 * The system shall update the order payment status after successful payment confirmation. COMPLETED
 * The system shall support pending, paid, failed, refunded, and partially refunded billing states. PENDING
 * The system shall generate tax invoices, payment receipts, and settlement summaries. PENDING
 * The system shall allow authorized staff to record cash payments and manual adjustments. PENDING
-* The system shall support refund workflows with reason capture and approval, where applicable. PENDING
+* The system shall support refund workflows with reason capture and approval, where applicable. PARTIALLY COMPLETED
