@@ -39,4 +39,4 @@ Functional requirements
 * The system shall support pending, paid, failed, refunded, and partially refunded billing states. PENDING
 * The system shall generate tax invoices, payment receipts, and settlement summaries. PENDING
 * The system shall allow authorized staff to record cash payments and manual adjustments. PENDING
-* The system shall support refund workflows with reason capture and approval, where applicable. PARTIALLY COMPLETED
+* The system shall support refund workflows with reason capture and approval, where applicable.  COMPLETED
