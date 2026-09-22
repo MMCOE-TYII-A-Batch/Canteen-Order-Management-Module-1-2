@@ -221,13 +221,25 @@ function saveAddressToLocalStorage(address, userId) {
   }
 }
 
-function computeBilling(items) {
+function roundCurrency(value) {
+  return Number(Math.round((Number(value) || 0) * 100) / 100);
+}
+
+function computeBilling(items = []) {
   // items: array of {name, qty, price}
-  const subtotal = items.reduce((s, it) => s + (it.price * (it.qty || 1)), 0);
-  const tax = +(subtotal * 0.05).toFixed(2); // 5%
-  const service = +(subtotal * 0.02).toFixed(2);
+  const subtotal = roundCurrency(items.reduce((s, it) => {
+    const qty = Number(it.qty ?? it.quantity ?? 1);
+    const price = Number(it.price ?? 0);
+    return s + (price * qty);
+  }, 0));
+
+  const taxRate = 0.05;
+  const serviceRate = 0.02;
+  const tax = roundCurrency(subtotal * taxRate);
+  const service = roundCurrency(subtotal * serviceRate);
   const discount = 0.00;
-  const total = +(subtotal + tax + service - discount).toFixed(2);
+  const total = roundCurrency(subtotal + tax + service - discount);
+
   return { subtotal, tax, service, discount, total };
 }
 
@@ -258,12 +270,17 @@ async function initPayment(order, deliveryAddressParam = null) {
     const res = await fetch(getPaymentApiUrl(), { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: form.toString() });
     const data = await res.json();
     if (res.ok && data.status === 'success') {
-      showNotification('Payment initiated. Simulating gateway...', 'info');
       console.log(`✅ Payment initiated with ID: ${data.paymentId}`);
-      // Simulate redirect to gateway and immediate callback success
-      setTimeout(() => {
-        simulateGatewayCallback(data.paymentId, 'success', order.orderId, deliveryAddress);
-      }, 700);
+      if (method === 'Cash') {
+        showNotification('Cash payment request sent to the POS counter.', 'info');
+        pollCashPaymentStatus(data.paymentId, order, deliveryAddress);
+      } else {
+        showNotification('Payment initiated. Simulating gateway...', 'info');
+        // Simulate redirect to gateway and immediate callback success
+        setTimeout(() => {
+          simulateGatewayCallback(data.paymentId, 'success', order.orderId, deliveryAddress);
+        }, 700);
+      }
     } else {
       showNotification(data.message || 'Failed to initiate payment', 'error');
     }
@@ -271,6 +288,90 @@ async function initPayment(order, deliveryAddressParam = null) {
     console.error(e);
     showNotification('Cannot reach payment endpoint', 'error');
   }
+}
+
+function pollCashPaymentStatus(paymentId, order, deliveryAddress) {
+  const poll = async () => {
+    try {
+      const response = await fetch(getPaymentApiUrl(`?action=paymentStatus&paymentId=${encodeURIComponent(paymentId)}`));
+      const data = await response.json();
+      if (!response.ok || data.status !== 'success') throw new Error(data.message || 'Unable to read cash payment status');
+
+      if (data.paymentStatus === 'PAID') {
+        showNotification('Payment PAID', 'success');
+        generateCashReceipt(order, data, deliveryAddress);
+        clearPendingCart();
+        return;
+      }
+
+      if (data.paymentStatus === 'FAILED') {
+        await showCashPaymentProblemPopup();
+        window.location.href = 'menu.html';
+        return;
+      }
+
+      setTimeout(poll, 2000);
+    } catch (error) {
+      console.error('Cash payment status check failed:', error);
+      setTimeout(poll, 3000);
+    }
+  };
+
+  poll();
+}
+
+function showCashPaymentProblemPopup() {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.className = 'cp-confirm-overlay';
+
+    const box = document.createElement('div');
+    box.className = 'cp-confirm-box';
+
+    const header = document.createElement('div');
+    header.className = 'cp-confirm-header';
+    const title = document.createElement('h5');
+    title.className = 'cp-confirm-title';
+    title.textContent = 'Payment Problem';
+    header.appendChild(title);
+
+    const body = document.createElement('div');
+    body.className = 'cp-confirm-body';
+    body.textContent = 'Your payment is not recieved Please Pay at counter first';
+
+    const actions = document.createElement('div');
+    actions.className = 'cp-confirm-actions';
+    const okButton = document.createElement('button');
+    okButton.type = 'button';
+    okButton.className = 'cp-confirm-btn cp-confirm-btn-confirm';
+    okButton.textContent = 'OK';
+    actions.appendChild(okButton);
+
+    const close = () => {
+      overlay.remove();
+      resolve();
+    };
+
+    okButton.addEventListener('click', close);
+    box.append(header, body, actions);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+  });
+}
+
+function generateCashReceipt(order, paymentData, deliveryAddress) {
+  const pendingCart = JSON.parse(localStorage.getItem('pending_cart') || 'null');
+  const cart = JSON.parse(localStorage.getItem('canteen_cart') || '[]');
+  const items = pendingCart && pendingCart.length ? pendingCart : cart;
+  const receiptOrder = {
+    orderId: order.orderId,
+    items: items.map(item => ({
+      name: item.name || 'Item',
+      qty: item.quantity || item.qty || 1,
+      price: item.price || item.unitPrice || 0
+    }))
+  };
+  generateProfessionalReceipt(receiptOrder, paymentData, deliveryAddress);
 }
 
 async function simulateGatewayCallback(paymentId, result, orderId, deliveryAddress) {
@@ -299,9 +400,17 @@ async function simulateGatewayCallback(paymentId, result, orderId, deliveryAddre
         items = cart.map(c => ({ name: c.name || 'Item', qty: c.quantity || c.qty || 1, price: c.price || c.unitPrice || 0 }));
       }
 
+      const invoiceData = {
+        subtotal: Number(data.subtotal ?? 0),
+        tax: Number(data.tax ?? 0),
+        serviceCharge: Number(data.serviceCharge ?? 0),
+        discount: Number(data.discount ?? 0),
+        total: Number(data.total ?? 0),
+      };
+
       // Generate professional receipt
       const order = { orderId: orderId || data.orderId || paymentId, items };
-      generateProfessionalReceipt(order, data, deliveryAddress);
+      generateProfessionalReceipt(order, { ...data, ...invoiceData }, deliveryAddress);
 
       // Clear cart upon successful payment
       clearPendingCart();
@@ -324,13 +433,17 @@ async function loadPaymentsList() {
     tbody.innerHTML = '';
     list.forEach(p => {
       const tr = document.createElement('tr');
+      const refundAction = String(p.status || '').toUpperCase() === 'FAILED'
+        ? ''
+        : `<button class="btn btn-sm btn-outline-danger" onclick="triggerRefund(${p.paymentId}, ${p.amount})">Refund</button>`;
       tr.innerHTML = `
         <td>${p.paymentId}</td>
         <td>${p.orderId}</td>
+        <td>${p.userName || 'Unknown User'}</td>
         <td>${p.method}</td>
         <td>₹${p.amount}</td>
         <td>${p.status}</td>
-        <td><button class="btn btn-sm btn-outline-danger" onclick="triggerRefund(${p.paymentId}, ${p.amount})">Refund</button></td>
+        <td>${refundAction}</td>
       `;
       tbody.appendChild(tr);
     });
@@ -347,8 +460,16 @@ function generateProfessionalReceipt(order, paymentData, deliveryAddress) {
   // Store current orderId globally for cancellation
   window.currentOrderId = order.orderId;
 
-  // Calculate billing details
-  const billing = computeBilling(order.items);
+  const hasInvoiceTotals = paymentData && Number.isFinite(Number(paymentData.total));
+  const billing = hasInvoiceTotals
+    ? {
+        subtotal: Number(paymentData.subtotal ?? 0),
+        tax: Number(paymentData.tax ?? 0),
+        service: Number(paymentData.serviceCharge ?? paymentData.service ?? 0),
+        discount: Number(paymentData.discount ?? 0),
+        total: Number(paymentData.total ?? 0),
+      }
+    : computeBilling(order.items);
   const method = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'UPI';
 
   // Set Receipt Header
@@ -401,10 +522,11 @@ function generateProfessionalReceipt(order, paymentData, deliveryAddress) {
   itemsTable.innerHTML = itemHtml;
 
   // Populate Billing Summary
-  document.getElementById('receiptSubtotal').textContent = `₹${billing.subtotal.toFixed(2)}`;
-  document.getElementById('receiptDiscount').textContent = `-₹${billing.discount.toFixed(2)}`;
-  document.getElementById('receiptTaxes').textContent = `₹${billing.tax.toFixed(2)}`;
-  document.getElementById('receiptTotal').textContent = `₹${billing.total.toFixed(2)}`;
+  document.getElementById('receiptSubtotal').textContent = `₹${Number(billing.subtotal || 0).toFixed(2)}`;
+  document.getElementById('receiptDiscount').textContent = `-₹${Number(billing.discount || 0).toFixed(2)}`;
+  document.getElementById('receiptService').textContent = `₹${Number(billing.service || 0).toFixed(2)}`;
+  document.getElementById('receiptTaxes').textContent = `₹${Number(billing.tax || 0).toFixed(2)}`;
+  document.getElementById('receiptTotal').textContent = `₹${Number(billing.total || 0).toFixed(2)}`;
 
   // Populate Delivery Address
   document.getElementById('receiptAddress').textContent = deliveryAddress || 'Main Canteen Counter';
@@ -425,37 +547,31 @@ let cancellationTimerInterval = null;
 // Clear all cart data (localStorage, global array, UI)
 function clearAllCartData() {
   try {
-    // Clear localStorage
-    localStorage.removeItem('canteen_cart');
-    localStorage.removeItem('pending_cart');
-    
-    // Clear global cartItems array (from main.js)
+    localStorage.setItem('canteen_cart', JSON.stringify([]));
+    localStorage.setItem('pending_cart', JSON.stringify([]));
+
     if (typeof cartItems !== 'undefined') {
       cartItems = [];
     }
-    
-    // Update cart badge to 0
-    const cartBadge = document.querySelector('.cart-badge') || document.querySelector('[data-cart-count]');
+
+    const cartBadge = document.getElementById('cart-count') || document.querySelector('.cart-badge') || document.querySelector('[data-cart-count]');
     if (cartBadge) {
       cartBadge.textContent = '0';
-      cartBadge.style.display = 'none';
+      cartBadge.style.display = 'inline-block';
     }
-    
-    // Close cart modal if it's open
-    const cartModal = document.getElementById('cartModal') || document.querySelector('[id*="cart"]');
-    if (cartModal && cartModal.style.display !== 'none') {
-      // Close via close button if available
-      const closeBtn = cartModal.querySelector('[data-bs-dismiss="modal"]') || 
-                       cartModal.querySelector('.btn-close') ||
-                       cartModal.querySelector('[onclick*="close"]');
-      if (closeBtn) {
-        closeBtn.click();
-      } else {
-        cartModal.style.display = 'none';
+
+    const allCartModals = document.querySelectorAll('#cartModal, [id*="cart"]');
+    allCartModals.forEach(modal => {
+      if (modal && modal.style && modal.style.display !== 'none') {
+        modal.style.display = 'none';
       }
+    });
+
+    if (typeof renderCartModal === 'function') {
+      renderCartModal();
     }
-    
-    console.log('🧹 Cart cleared successfully: localStorage items removed, badge updated, modal closed');
+
+    console.log('🧹 Cart cleared successfully: localStorage reset, badge updated, modal closed');
   } catch (e) {
     console.error('Error clearing cart:', e);
   }
@@ -490,9 +606,7 @@ function startCancellationTimer(orderId) {
       `;
       console.log('✅ Cancellation window closed - order sent to kitchen');
       
-      // Clear the cart completely when order is confirmed
       clearAllCartData();
-      
       return;
     }
 
@@ -516,9 +630,13 @@ function startCancellationTimer(orderId) {
 
 // Cancel order with user confirmation
 async function cancelOrderWithConfirmation(orderId) {
-  const confirmed = confirm(
-    `Are you sure you want to cancel Order #${orderId}?\n\nYour payment will be refunded to your original payment method.`
-  );
+  const confirmed = await confirmWithPopup({
+    title: 'Cancel Order',
+    message: `Are you sure you want to cancel Order #${orderId}? Your payment will be refunded to your original payment method.`,
+    confirmText: 'Yes, Cancel',
+    cancelText: 'Keep Order',
+    danger: true
+  });
 
   if (!confirmed) return;
 
@@ -555,7 +673,20 @@ async function cancelOrderWithConfirmation(orderId) {
         `;
       }
       
-      showNotification(`✅ Order #${orderId} cancelled successfully. Refund initiated.`, 'success');
+      clearAllCartData();
+      const showRollbackPage = await confirmWithPopup({
+        title: 'Order Cancelled',
+        message: 'Your Order Get Cancelled Successfully ',
+        confirmText: 'View Payment Rollback',
+        cancelText: 'Return to Menu',
+        danger: false
+      });
+
+      if (showRollbackPage) {
+        window.location.href = `payment-rollback.html?orderId=${encodeURIComponent(orderId)}`;
+      } else {
+        window.location.href = 'menu.html';
+      }
       console.log(`✅ Order #${orderId} cancelled and deleted from database`);
     } else {
       showNotification(`❌ Failed to cancel order: ${data.message || 'Unknown error'}`, 'error');
@@ -666,13 +797,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Proceed with payment
       const order = { orderId: orderId, items: items };
-      document.getElementById('orderSummary').innerHTML = `<pre>${JSON.stringify(billing, null, 2)}</pre>`;
       initPayment(order, deliveryAddress);
     });
   }
 
+  const goToMenuBtn = document.getElementById('goToMenuBtn');
+  if (goToMenuBtn) goToMenuBtn.addEventListener('click', () => window.location.href = 'menu.html');
+
+  const goToHomeBtn = document.getElementById('goToHomeBtn');
+  if (goToHomeBtn) goToHomeBtn.addEventListener('click', () => window.location.href = 'index.html');
+
   const closeReceipt = document.getElementById('closeReceipt');
-  if (closeReceipt) closeReceipt.addEventListener('click', () => document.getElementById('receiptCard').style.display = 'none');
+  if (closeReceipt) closeReceipt.addEventListener('click', () => window.location.href = 'menu.html');
 
   if (document.getElementById('paymentsTableBody')) {
     loadPaymentsList();
