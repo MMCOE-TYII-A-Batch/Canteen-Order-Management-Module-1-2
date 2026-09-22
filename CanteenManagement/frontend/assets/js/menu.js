@@ -58,6 +58,140 @@ function renderMenuError(message) {
   `;
 }
 
+function getFeedbackApiUrl(queryString = "") {
+  const contextPath = "/canteen";
+  if (window.location.origin.startsWith("file:") || window.location.port !== "8080") {
+    return `http://localhost:8080${contextPath}/feedback${queryString}`;
+  }
+  return `${window.location.origin}${contextPath}/feedback${queryString}`;
+}
+
+async function fetchDishFeedback(dishId) {
+  try {
+    const response = await fetch(getFeedbackApiUrl(`?dishId=${encodeURIComponent(dishId)}`));
+    if (!response.ok) throw new Error("Failed to fetch item feedback");
+    return await response.json();
+  } catch (err) {
+    console.warn("Unable to load feedback for dish:", err);
+    return [];
+  }
+}
+
+function renderFeedbackList(feedbackList) {
+  const listContainer = document.getElementById("feedbackListContainer");
+  if (!listContainer) return;
+
+  if (!feedbackList || feedbackList.length === 0) {
+    listContainer.innerHTML = '<div class="feedback-empty">No feedback shared yet. Be the first to review this item.</div>';
+    return;
+  }
+
+  listContainer.innerHTML = feedbackList.map(item => {
+    const stars = '★'.repeat(item.rating) + '☆'.repeat(5 - item.rating);
+    const safeComment = (item.comments || 'No additional comments.').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return `
+      <div class="feedback-item">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <strong>${(item.userName || 'Customer').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</strong>
+          <span class="stars">${stars}</span>
+        </div>
+        <small>${new Date(item.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</small>
+        <p class="mb-0 mt-2 text-secondary">${safeComment}</p>
+      </div>
+    `;
+  }).join('');
+}
+
+function setFeedbackStars(selectedRating) {
+  const stars = document.querySelectorAll('.feedback-star');
+  stars.forEach(star => {
+    star.classList.toggle('active', Number(star.dataset.rating) <= Number(selectedRating));
+  });
+  const selectedText = document.getElementById('selectedRatingValue');
+  if (selectedText) selectedText.textContent = selectedRating;
+}
+
+async function openFeedbackModal(dish, mode = 'write') {
+  const modal = document.getElementById('dishFeedbackModal');
+  if (!modal) return;
+
+  const title = document.getElementById('feedbackDishTitle');
+  const averageBadge = document.getElementById('feedbackAverageBadge');
+  const countBadge = document.getElementById('feedbackCountBadge');
+  const formSection = document.getElementById('feedbackFormSection');
+  const submitBtn = document.getElementById('submitFeedbackBtn');
+  const commentInput = document.getElementById('feedbackComment');
+  const starButtons = document.querySelectorAll('.feedback-star');
+
+  if (title) title.textContent = `${dish.name} Feedback`;
+
+  const feedbackList = await fetchDishFeedback(dish.id);
+  const average = feedbackList.length ? (feedbackList.reduce((sum, item) => sum + Number(item.rating), 0) / feedbackList.length).toFixed(1) : '0.0';
+  const count = feedbackList.length || 0;
+
+  if (averageBadge) averageBadge.textContent = `${average} ★`;
+  if (countBadge) countBadge.textContent = `${count} review${count === 1 ? '' : 's'}`;
+  renderFeedbackList(feedbackList);
+
+  if (formSection) {
+    formSection.style.display = mode === 'write' ? 'block' : 'none';
+  }
+
+  if (submitBtn) {
+    submitBtn.onclick = async () => {
+      const user = getActiveUserSession();
+      if (!user) {
+        showNotification('Please log in before submitting feedback.', 'warning');
+        return;
+      }
+
+      const rating = Number(document.getElementById('selectedRatingValue')?.textContent || 5);
+      const comments = (commentInput?.value || '').trim();
+
+      try {
+        const form = new URLSearchParams();
+        form.append('action', 'addFeedback');
+        form.append('userId', user.userId || user.id);
+        form.append('dishId', dish.id);
+        form.append('rating', rating);
+        form.append('comments', comments);
+
+        const response = await fetch(getFeedbackApiUrl(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: form.toString()
+        });
+
+        const data = await response.json();
+        if (!response.ok || data.status !== 'success') {
+          throw new Error(data.message || 'Unable to add feedback');
+        }
+
+        if (commentInput) commentInput.value = '';
+        setFeedbackStars(5);
+        const refreshed = await fetchDishFeedback(dish.id);
+        renderFeedbackList(refreshed);
+        const avg = refreshed.length ? (refreshed.reduce((sum, item) => sum + Number(item.rating), 0) / refreshed.length).toFixed(1) : '0.0';
+        if (averageBadge) averageBadge.textContent = `${avg} ★`;
+        if (countBadge) countBadge.textContent = `${refreshed.length} review${refreshed.length === 1 ? '' : 's'}`;
+        showNotification('✅ Thank you for sharing your feedback.', 'success');
+      } catch (err) {
+        console.error('Feedback submission failed:', err);
+        showNotification(err.message || 'Unable to save your feedback right now.', 'error');
+      }
+    };
+  }
+
+  starButtons.forEach(button => {
+    button.addEventListener('click', () => setFeedbackStars(button.dataset.rating));
+  });
+
+  setFeedbackStars(5);
+
+  const modalInstance = bootstrap.Modal.getOrCreateInstance(modal);
+  modalInstance.show();
+}
+
 function renderMenuCards(items) {
   const container = getMenuContainer();
   if (!container) return;
@@ -73,12 +207,13 @@ function renderMenuCards(items) {
     const isOut = !dish.isAvailable || (dish.stockQuantity !== undefined && dish.stockQuantity <= 0);
     const stockBadge = isOut ? '<span class="badge bg-danger ms-1">Out of Stock</span>' : '';
     const offerBadge = dish.isOffer ? '<span class="badge bg-warning text-dark me-1">Special Offer</span>' : '';
+    const dishNameSafe = (dish.name || 'Dish').replace(/"/g, '&quot;');
 
     const card = document.createElement("div");
     card.className = "col-md-6 col-lg-4 mb-4";
     card.innerHTML = `
       <div class="card custom-card h-100 shadow-sm ${isOut ? 'opacity-75' : ''}">
-        <img src="${dish.image || 'assets/images/burger.jpg'}" class="card-img-top" style="height: 180px; object-fit: cover;" alt="${dish.name}">
+        <img src="${dish.image || 'assets/images/burger.jpg'}" class="card-img-top" style="height: 180px; object-fit: cover;" alt="${dishNameSafe}">
         <div class="card-body d-flex flex-column">
           <div class="d-flex justify-content-between align-items-start mb-2">
             <h5 class="card-title fw-bold mb-0">${dish.name}</h5>
@@ -97,7 +232,12 @@ function renderMenuCards(items) {
             <div><strong>Nutrition:</strong> ${dish.nutrition || 'N/A'}</div>
           </div>
 
-          <div class="d-flex justify-content-between align-items-center">
+          <div class="feedback-action-row">
+            <button type="button" class="btn btn-sm btn-outline-warning" data-feedback-mode="write" data-dish-id="${dish.id}" data-dish-name="${dishNameSafe}"><i class="bi bi-chat-dots"></i> Feedback</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-feedback-mode="view" data-dish-id="${dish.id}" data-dish-name="${dishNameSafe}"><i class="bi bi-eye"></i> See Feedback</button>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mt-3">
             <span class="text-muted small"><i class="bi bi-clock"></i> ${dish.prepTime || '10 mins'}</span>
             ${isOut ? 
               '<button class="btn btn-sm btn-secondary" disabled>Unavailable</button>' : 
@@ -107,6 +247,18 @@ function renderMenuCards(items) {
         </div>
       </div>
     `;
+
+    const feedbackButtons = card.querySelectorAll('[data-dish-id]');
+    feedbackButtons.forEach(button => {
+      button.addEventListener('click', async () => {
+        const selectedDish = {
+          id: Number(button.dataset.dishId),
+          name: button.dataset.dishName || 'Dish'
+        };
+        await openFeedbackModal(selectedDish, button.dataset.feedbackMode || 'write');
+      });
+    });
+
     container.appendChild(card);
   });
 }
