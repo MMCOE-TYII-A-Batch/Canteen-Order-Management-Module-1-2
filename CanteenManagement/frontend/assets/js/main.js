@@ -109,6 +109,7 @@ const orders = [
 ];
 
 let cartItems = JSON.parse(localStorage.getItem("canteen_cart") || "[]");
+const MAX_ITEM_QUANTITY = 5;
 
 function saveCartItems() {
   localStorage.setItem("canteen_cart", JSON.stringify(cartItems));
@@ -122,11 +123,81 @@ function updateCartBadge() {
   cartBadge.textContent = totalQty.toString();
 }
 
+async function renderTodaysSpecials() {
+  const container = document.getElementById("todaysSpecialsContainer");
+  const title = document.getElementById("todaysSpecialTitle");
+  if (!container || !title) return;
+
+  const config = JSON.parse(localStorage.getItem("todays_special_config") || "null");
+  if (!config || !Array.isArray(config.dishIds) || !config.dishIds.length) return;
+
+  let availableDishes = dishes;
+  try {
+    const response = await fetch(getHomeDishApiUrl());
+    if (response.ok) availableDishes = await response.json();
+  } catch (error) {
+    console.warn("Unable to load live Today's Special dishes:", error);
+  }
+
+  const selectedDishes = config.dishIds
+    .map(id => availableDishes.find(dish => Number(dish.id) === Number(id)))
+    .filter(Boolean);
+  if (!selectedDishes.length) return;
+
+  title.textContent = config.eventName || "Today's Specials";
+  container.innerHTML = selectedDishes.map(dish => `
+    <div class="col-md-4">
+      <div class="card custom-card h-100">
+        <img src="${dish.image || 'assets/images/burger.jpg'}" class="card-img-top dish-img" alt="${escapeSpecialText(dish.name)}">
+        <div class="card-body">
+          <span class="badge badge-offer mb-2">Special Offer</span>
+          <h5 class="card-title fw-bold">${escapeSpecialText(dish.name)}</h5>
+          <p class="card-text text-secondary small">${escapeSpecialText(dish.description || 'Delicious canteen dish.')}</p>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="fs-5 fw-bold">₹${dish.price}</span>
+            <button class="btn btn-sm btn-canteen-primary special-add-button">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.special-add-button').forEach((button, index) => {
+    const dish = selectedDishes[index];
+    button.addEventListener('click', () => addCartItem(
+      dish.name,
+      dish.price,
+      dish.id,
+      dish.category || 'Snacks',
+      dish.description || ''
+    ));
+  });
+}
+
+function getHomeDishApiUrl() {
+  const contextPath = "/canteen";
+  if (window.location.origin.startsWith("file:") || window.location.port !== "8080") {
+    return `http://localhost:8080${contextPath}/dish`;
+  }
+  return `${window.location.origin}${contextPath}/dish`;
+}
+
+function escapeSpecialText(value) {
+  return String(value || '').replace(/[&<>"']/g, character => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[character]));
+}
+
 function addCartItem(name, price, dishId = 0, category = "Snacks", description = "") {
   const unitPrice = Number(price) || 0;
   const existing = cartItems.find(item => item.dishId === dishId && item.name === name);
   if (existing) {
-    existing.quantity = (existing.quantity || 0) + 1;
+    const nextQty = (existing.quantity || 0) + 1;
+    if (nextQty > MAX_ITEM_QUANTITY) {
+      showNotification(`You can add only ${MAX_ITEM_QUANTITY} of ${name} at a time.`, "warning");
+      return;
+    }
+    existing.quantity = nextQty;
   } else {
     cartItems.push({ dishId, name, price: unitPrice, quantity: 1, category, description });
   }
@@ -144,7 +215,14 @@ function removeCartItem(index) {
 function changeCartItemQuantity(index, delta) {
   const item = cartItems[index];
   if (!item) return;
-  item.quantity = Math.max(1, (item.quantity || 1) + delta);
+
+  const nextQty = (item.quantity || 1) + delta;
+  if (nextQty > MAX_ITEM_QUANTITY) {
+    showNotification(`You can add only ${MAX_ITEM_QUANTITY} units of this item.`, "warning");
+    return;
+  }
+
+  item.quantity = Math.max(1, nextQty);
   if (item.quantity <= 0) {
     cartItems.splice(index, 1);
   }
@@ -269,7 +347,7 @@ function renderCartModal() {
           <div class="d-flex align-items-center gap-2">
             <button class="btn btn-sm btn-outline-secondary" onclick="changeCartItemQuantity(${index}, -1)">-</button>
             <span>${item.quantity}</span>
-            <button class="btn btn-sm btn-outline-secondary" onclick="changeCartItemQuantity(${index}, 1)">+</button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="changeCartItemQuantity(${index}, 1)" ${item.quantity >= MAX_ITEM_QUANTITY ? 'disabled' : ''}>+</button>
           </div>
         </td>
         <td>₹${itemTotal.toFixed(2)}</td>
@@ -357,6 +435,46 @@ function showNotification(message, type = 'info', opts = {}) {
     toast.classList.add('cp-toast-hide');
     setTimeout(() => toast.remove(), 350);
   }, delay);
+}
+
+function confirmWithPopup({ title, message, confirmText = 'Confirm', cancelText = 'Cancel', danger = false } = {}) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'cp-confirm-overlay';
+
+    const box = document.createElement('div');
+    box.className = 'cp-confirm-box';
+
+    const confirmButtonClass = danger ? 'cp-confirm-btn cp-confirm-btn-danger' : 'cp-confirm-btn cp-confirm-btn-confirm';
+
+    box.innerHTML = `
+      <div class="cp-confirm-header">
+        <h5 class="cp-confirm-title">${title || 'Confirm Action'}</h5>
+      </div>
+      <div class="cp-confirm-body">${message || 'Are you sure?'}</div>
+      <div class="cp-confirm-actions">
+        <button type="button" class="cp-confirm-btn cp-confirm-btn-cancel">${cancelText}</button>
+        <button type="button" class="${confirmButtonClass}">${confirmText}</button>
+      </div>
+    `;
+
+    const cancelBtn = box.querySelector('.cp-confirm-btn-cancel');
+    const confirmBtn = box.querySelector('.cp-confirm-btn-confirm, .cp-confirm-btn-danger');
+
+    const close = (result) => {
+      overlay.remove();
+      resolve(result);
+    };
+
+    cancelBtn.addEventListener('click', () => close(false));
+    confirmBtn.addEventListener('click', () => close(true));
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay) close(false);
+    });
+
+    document.body.appendChild(overlay);
+    overlay.appendChild(box);
+  });
 }
 
 function getActiveUserSession() {
@@ -847,6 +965,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   updateCartCount();
+  renderTodaysSpecials();
 
   renderGlobalNavbarSession();
   if (currentPath === "profile.html") {
