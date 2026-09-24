@@ -6,6 +6,7 @@ USE canteen_management;
 
 -- Drop existing tables
 DROP TABLE IF EXISTS user_feedback;
+DROP TABLE IF EXISTS order_change_logs;
 DROP TABLE IF EXISTS audit_logs;
 DROP TABLE IF EXISTS order_items;
 DROP TABLE IF EXISTS orders;
@@ -86,6 +87,7 @@ CREATE TABLE orders (
     total_amount DECIMAL(10, 2) NOT NULL,
     tax_amount DECIMAL(10, 2) DEFAULT 0.00,
     delivery_address VARCHAR(500) NOT NULL DEFAULT 'Main Canteen Counter',
+    payment_status ENUM('PENDING', 'PAID', 'FAILED') DEFAULT 'PENDING',
     status ENUM('New', 'Preparing', 'Prepared', 'Ready For Delivery', 'Out For Delivery', 'Delivered', 'Cancelled') DEFAULT 'New',
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
@@ -103,7 +105,23 @@ CREATE TABLE order_items (
     FOREIGN KEY (dish_id) REFERENCES dishes(dish_id) ON DELETE CASCADE
 );
 
--- TABLE 8: user_delivery_addresses (Store saved delivery addresses per user)
+-- TABLE 10: order_change_logs (Tracks quantity removals and partial order cancellations)
+CREATE TABLE order_change_logs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    user_id INT,
+    dish_id INT,
+    action VARCHAR(50) NOT NULL DEFAULT 'PARTIAL_CANCEL',
+    removed_quantity INT DEFAULT 0,
+    amount_adjusted DECIMAL(10, 2) DEFAULT 0.00,
+    details TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL,
+    FOREIGN KEY (dish_id) REFERENCES dishes(dish_id) ON DELETE SET NULL
+);
+
+-- TABLE 9: user_delivery_addresses (Store saved delivery addresses per user)
 CREATE TABLE user_delivery_addresses (
     address_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -116,7 +134,7 @@ CREATE TABLE user_delivery_addresses (
     UNIQUE KEY unique_user_address (user_id, address)
 );
 
--- TABLE 9: user_feedback (Dish-specific feedback tracking)
+-- TABLE 11: user_feedback (Dish-specific feedback tracking)
 CREATE TABLE user_feedback (
     feedback_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
