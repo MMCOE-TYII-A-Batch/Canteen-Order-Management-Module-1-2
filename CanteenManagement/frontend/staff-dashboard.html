@@ -25,11 +25,15 @@
 
       <div class="collapse navbar-collapse" id="staffNav">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link active" href="staff-dashboard.html">Staff Dashboard</a></li>
+          <!-- <li class="nav-item"><a class="nav-link active" href="staff-dashboard.html">Staff Dashboard</a></li> -->
           <li class="nav-item"><a class="nav-link" href="menu.html">View Menu</a></li>
         </ul>
         <div class="d-flex align-items-center gap-2">
-          <span class="text-light me-2"><i class="bi bi-person-workspace text-warning me-1"></i> <span id="staffNavName">Staff Portal</span></span>
+          <a id="profileLink" href="profile.html" class="btn btn-outline-warning btn-sm d-flex align-items-center gap-1">
+            <i class="bi bi-person-circle fs-6"></i>
+            <span>Profile</span>
+          </a>
+          <!-- <span class="text-light me-2"><i class="bi bi-person-workspace text-warning me-1"></i> <span id="staffNavName">Staff Portal</span></span> -->
           <a href="login.html" class="btn btn-outline-light btn-sm" onclick="localStorage.clear(); sessionStorage.clear();">Logout</a>
         </div>
       </div>
@@ -202,46 +206,18 @@
           <div class="col-md-6">
             <div class="card custom-card p-4 h-100">
               <h4 class="fw-bold mb-3"><i class="bi bi-credit-card-2-front text-success me-2"></i>POS Cash Counter Checkout</h4>
-              <form id="cashierForm" onsubmit="event.preventDefault(); showNotification('Invoice payment processed successfully!', 'success');">
-                <div class="mb-3">
-                  <label for="posOrderId" class="form-label fw-semibold">Order ID</label>
-                  <input type="text" class="form-control" id="posOrderId" placeholder="e.g. 101" required>
-                </div>
-                <div class="mb-3">
-                  <label for="posAmount" class="form-label fw-semibold">Amount Received (₹)</label>
-                  <input type="number" class="form-control" id="posAmount" placeholder="e.g. 160" required>
-                </div>
-                <div class="mb-3">
-                  <label for="posMethod" class="form-label fw-semibold">Payment Method</label>
-                  <select class="form-select" id="posMethod">
-                    <option value="Cash">Cash Counter</option>
-                    <option value="UPI">UPI / QR Code</option>
-                    <option value="Card">Campus ID Wallet Card</option>
-                  </select>
-                </div>
-                <button type="submit" class="btn btn-canteen-primary w-100 py-2">Generate Paid Invoice</button>
-              </form>
+              <p class="text-secondary small">Pending cash payment requests from customers appear here.</p>
+              <div id="cashRequestsList">
+                <p class="text-muted small mb-0">Loading cash requests...</p>
+              </div>
             </div>
           </div>
 
           <div class="col-md-6">
             <div class="card custom-card p-4 h-100">
               <h4 class="fw-bold mb-3"><i class="bi bi-receipt-cutoff me-2"></i>Recent Cashier Counter Invoices</h4>
-              <div class="list-group">
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="mb-0 fw-bold">Invoice #INV-9021</h6>
-                    <small class="text-secondary">Order #101 | Paid via Cash</small>
-                  </div>
-                  <span class="badge bg-success fs-6">₹160</span>
-                </div>
-                <div class="list-group-item d-flex justify-content-between align-items-center mt-2">
-                  <div>
-                    <h6 class="mb-0 fw-bold">Invoice #INV-9022</h6>
-                    <small class="text-secondary">Order #102 | Paid via UPI</small>
-                  </div>
-                  <span class="badge bg-success fs-6">₹150</span>
-                </div>
+              <div id="cashierInvoicesList" class="list-group">
+                <p class="text-muted small mb-0">Paid cash invoices will appear here.</p>
               </div>
             </div>
           </div>

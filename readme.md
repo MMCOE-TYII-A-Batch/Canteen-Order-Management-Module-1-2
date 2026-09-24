@@ -22,7 +22,7 @@ Functional requirements
 Functional requirements
 * The system shall allow customers to add one or more items to a cart and modify quantity before checkout. COMPLETED
 * The system shall support order types such as dine-in, takeaway, counter pickup, and workstation or hostel delivery, where applicable. COMPLETED
-* The system shall capture delivery location or pickup counter and selected service time.COMPLETED
+* The system shall capture delivery location or pickup counter and selected service time. COMPLETED
 * The system shall validate item availability, quantity limits, pricing, taxes, offers, and cutoff times before order confirmation. COMPLETED
 * The system shall generate a unique order number for each confirmed order. COMPLETED
 * The system shall send confirmed orders in real time to the kitchen or merchant console. COMPLETED
@@ -32,11 +32,11 @@ Functional requirements
 * The system shall generate electronic receipts or order vouchers. COMPLETED
 
 4)Payment and billing
-* The system shall support multiple payment methods such as UPI, cards, wallets, cash, payroll deduction, campus card, or institution-approved gateways.COMPLETED
+* The system shall support multiple payment methods such as UPI, cards, wallets, cash, payroll deduction, campus card, or institution-approved gateways. COMPLETED
 * The system shall calculate subtotal, taxes, service charges, discounts, coupon value, and final payable amount. COMPLETED
-* The system shall integrate with external payment gateways and capture payment callback status. PENDING
+* The system shall integrate with external payment gateways and capture payment callback status. COMPLETED
 * The system shall update the order payment status after successful payment confirmation. COMPLETED
-* The system shall support pending, paid, failed, refunded, and partially refunded billing states. PENDING
-* The system shall generate tax invoices, payment receipts, and settlement summaries. PENDING
-* The system shall allow authorized staff to record cash payments and manual adjustments. PENDING
-* The system shall support refund workflows with reason capture and approval, where applicable.  COMPLETED
+* The system shall support pending, paid, failed, refunded, and partially refunded billing states. COMPLETED
+* The system shall generate tax invoices, payment receipts, and settlement summaries. COMPLETED
+* The system shall allow authorized staff to record cash payments and manual adjustments. COMPLETED
+* The system shall support refund workflows with reason capture and approval, where applicable. COMPLETED

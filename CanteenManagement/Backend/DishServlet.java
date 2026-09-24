@@ -165,6 +165,66 @@ public class DishServlet extends HttpServlet {
             return;
         }
 
+        if ("updateDish".equalsIgnoreCase(action)) {
+            int dishId = Integer.parseInt(request.getParameter("dishId"));
+            String name = request.getParameter("name");
+            String categoryName = request.getParameter("category");
+            String priceStr = request.getParameter("price");
+            String description = request.getParameter("description");
+            String ingredients = request.getParameter("ingredients");
+            String allergens = request.getParameter("allergens");
+            String nutrition = request.getParameter("nutrition");
+            String prepTime = request.getParameter("prepTime");
+            String servingWindow = request.getParameter("servingWindow");
+            String stockStr = request.getParameter("stockQuantity");
+            String imageUrl = request.getParameter("imageUrl");
+
+            if (name == null || priceStr == null) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"status\":\"error\",\"message\":\"Dish name and price are required for update.\"}");
+                return;
+            }
+
+            int categoryId = 3; // Default Snacks
+            String catSql = "SELECT category_id FROM categories WHERE category_name = ?";
+            String updateSql = "UPDATE dishes SET name = ?, category_id = ?, price = ?, description = ?, ingredients = ?, allergens = ?, nutrition = ?, prep_time = ?, serving_window = ?, stock_quantity = ?, image_url = ? WHERE dish_id = ?";
+
+            try (Connection conn = DBConnection.getConnection()) {
+                try (PreparedStatement psCat = conn.prepareStatement(catSql)) {
+                    psCat.setString(1, categoryName != null ? categoryName : "Snacks");
+                    ResultSet rs = psCat.executeQuery();
+                    if (rs.next()) categoryId = rs.getInt("category_id");
+                }
+
+                try (PreparedStatement psUpdate = conn.prepareStatement(updateSql)) {
+                    psUpdate.setString(1, name);
+                    psUpdate.setInt(2, categoryId);
+                    psUpdate.setDouble(3, Double.parseDouble(priceStr));
+                    psUpdate.setString(4, description != null ? description : "");
+                    psUpdate.setString(5, ingredients != null ? ingredients : "Standard Ingredients");
+                    psUpdate.setString(6, allergens != null ? allergens : "None");
+                    psUpdate.setString(7, nutrition != null ? nutrition : "N/A");
+                    psUpdate.setString(8, prepTime != null ? prepTime : "10 mins");
+                    psUpdate.setString(9, servingWindow != null ? servingWindow : "All Day");
+                    psUpdate.setInt(10, stockStr != null ? Integer.parseInt(stockStr) : 50);
+                    psUpdate.setString(11, imageUrl != null ? imageUrl : "");
+                    psUpdate.setInt(12, dishId);
+                    int updated = psUpdate.executeUpdate();
+                    if (updated > 0) {
+                        out.print("{\"status\":\"success\",\"message\":\"Dish updated successfully.\"}");
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                        out.print("{\"status\":\"error\",\"message\":\"Dish not found for update.\"}");
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                out.print("{\"status\":\"error\",\"message\":\"Failed to update dish.\"}");
+            }
+            return;
+        }
+
         // Add new dish
         String name = request.getParameter("name");
         String categoryName = request.getParameter("category");
@@ -176,6 +236,7 @@ public class DishServlet extends HttpServlet {
         String prepTime = request.getParameter("prepTime");
         String servingWindow = request.getParameter("servingWindow");
         String stockStr = request.getParameter("stockQuantity");
+        String imageUrl = request.getParameter("imageUrl");
 
         if (name == null || priceStr == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -185,7 +246,7 @@ public class DishServlet extends HttpServlet {
 
         int categoryId = 3; // Default Snacks
         String catSql = "SELECT category_id FROM categories WHERE category_name = ?";
-        String insertSql = "INSERT INTO dishes (name, category_id, price, description, ingredients, allergens, nutrition, prep_time, serving_window, stock_quantity, is_available) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE)";
+        String insertSql = "INSERT INTO dishes (name, category_id, price, description, ingredients, allergens, nutrition, prep_time, serving_window, stock_quantity, is_available, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE, ?)";
 
         try (Connection conn = DBConnection.getConnection()) {
             try (PreparedStatement psCat = conn.prepareStatement(catSql)) {
@@ -205,6 +266,7 @@ public class DishServlet extends HttpServlet {
                 psIns.setString(8, prepTime != null ? prepTime : "10 mins");
                 psIns.setString(9, servingWindow != null ? servingWindow : "All Day");
                 psIns.setInt(10, stockStr != null ? Integer.parseInt(stockStr) : 50);
+                psIns.setString(11, imageUrl != null ? imageUrl : "");
                 psIns.executeUpdate();
                 out.print("{\"status\":\"success\",\"message\":\"New dish added to menu!\"}");
             }

@@ -85,7 +85,7 @@ CREATE TABLE orders (
     user_id INT NOT NULL,
     total_amount DECIMAL(10, 2) NOT NULL,
     tax_amount DECIMAL(10, 2) DEFAULT 0.00,
-    pickup_location VARCHAR(255) DEFAULT 'Main Canteen Counter',
+    delivery_address VARCHAR(500) NOT NULL DEFAULT 'Main Canteen Counter',
     status ENUM('New', 'Preparing', 'Prepared', 'Ready For Delivery', 'Out For Delivery', 'Delivered', 'Cancelled') DEFAULT 'New',
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
@@ -103,17 +103,33 @@ CREATE TABLE order_items (
     FOREIGN KEY (dish_id) REFERENCES dishes(dish_id) ON DELETE CASCADE
 );
 
--- TABLE 8: user_feedback (Complaints & Feedback tracking)
+-- TABLE 8: user_delivery_addresses (Store saved delivery addresses per user)
+CREATE TABLE user_delivery_addresses (
+    address_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    address VARCHAR(500) NOT NULL,
+    is_default BOOLEAN DEFAULT FALSE,
+    usage_count INT DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_used TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_address (user_id, address)
+);
+
+-- TABLE 9: user_feedback (Dish-specific feedback tracking)
 CREATE TABLE user_feedback (
     feedback_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    dish_id INT NOT NULL,
     order_id INT,
     rating INT DEFAULT 5,
     comments TEXT,
     status ENUM('Open', 'Resolved') DEFAULT 'Open',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE SET NULL
+    FOREIGN KEY (dish_id) REFERENCES dishes(dish_id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE SET NULL,
+    UNIQUE KEY unique_user_dish_feedback (user_id, dish_id)
 );
 
 
@@ -132,12 +148,12 @@ INSERT INTO roles (role_id, role_name, description) VALUES
 
 -- 2. Insert Users
 INSERT INTO users (user_id, name, email, phone, college_id, department, password, role_id, status, dietary_preferences, default_location) VALUES
-(1, 'Rahul Sharma', 'rahul@college.edu', '9876543210', 'CS-2024-042', 'Computer Engineering', 'pass123', 1, 'Active', 'Vegetarian', 'Hostel Block A'),
-(2, 'Priya Patel', 'priya@college.edu', '9876543211', 'IT-2024-015', 'IT Engineering', 'pass123', 1, 'Active', 'Jain', 'Library Gate'),
-(3, 'Sanjay Kumar', 'sanjay@college.edu', '9876543212', 'MGR-101', 'Canteen Mgmt', 'admin123', 2, 'Active', 'None', 'Main Admin Office'),
-(4, 'Amit Verma', 'amit@college.edu', '9876543213', 'STF-201', 'Kitchen Staff', 'staff123', 3, 'Active', 'None', 'Kitchen Counter'),
-(5, 'Ramesh Singh', 'ramesh@college.edu', '9876543214', 'STF-202', 'Delivery Staff', 'staff123', 7, 'Active', 'None', 'Dispatch Desk'),
-(6, 'Super Admin', 'admin@college.edu', '9876543299', 'ADM-001', 'IT Support', 'admin123', 8, 'Active', 'None', 'System Desk');
+(1, 'Rahul Sharma', 'rahul@college.edu', '9876543210', 'CS-2024-042', 'Computer Engineering', '8d156015d5588109fe09535e770d87d011be10ab3a0b5ab439405cef226903d4', 1, 'Active', 'Vegetarian', 'Hostel Block A'),
+(2, 'Priya Patel', 'priya@college.edu', '9876543211', 'IT-2024-015', 'IT Engineering', '8d156015d5588109fe09535e770d87d011be10ab3a0b5ab439405cef226903d4', 1, 'Active', 'Jain', 'Library Gate'),
+(3, 'Sanjay Kumar', 'sanjay@college.edu', '9876543212', 'MGR-101', 'Canteen Mgmt', '66d260b2c7a31ebb3f91fd4dd383fbca027ac340ceb222b2f69d124b7441e6d9', 2, 'Active', 'None', 'Main Admin Office'),
+(4, 'Amit Verma', 'amit@college.edu', '9876543213', 'STF-201', 'Kitchen Staff', '5b0ebe2e8caaab06af07e8973dd186fa1ef2a90a3ec06db1830bb3efd63945af', 3, 'Active', 'None', 'Kitchen Counter'),
+(5, 'Ramesh Singh', 'ramesh@college.edu', '9876543214', 'STF-202', 'Delivery Staff', '5b0ebe2e8caaab06af07e8973dd186fa1ef2a90a3ec06db1830bb3efd63945af', 7, 'Active', 'None', 'Dispatch Desk'),
+(6, 'Super Admin', 'admin@college.edu', '9876543299', 'ADM-001', 'IT Support', '66d260b2c7a31ebb3f91fd4dd383fbca027ac340ceb222b2f69d124b7441e6d9', 8, 'Active', 'None', 'System Desk');
 
 -- 3. Insert Categories
 INSERT INTO categories (category_id, category_name, description) VALUES
@@ -157,7 +173,7 @@ INSERT INTO dishes (dish_id, name, category_id, price, tax_rate, description, in
 (6, 'Chole Bhature', 1, 90.00, 5.00, 'Spiced chickpea curry with fluffy bhaturas.', 'Flour, Chickpeas, Spices', 'Gluten', '480 kcal', '10 mins', '8:00 AM - 12:00 PM', 20, TRUE, FALSE, FALSE, TRUE, 0.00, 'assets/images/thali.jpg');
 
 -- 5. Insert Orders
-INSERT INTO orders (order_id, user_id, total_amount, tax_amount, pickup_location, status, order_date) VALUES
+INSERT INTO orders (order_id, user_id, total_amount, tax_amount, delivery_address, status, order_date) VALUES
 (101, 1, 160.00, 8.00, 'Hostel Block A', 'New', '2026-08-06 12:30:00'),
 (102, 2, 150.00, 7.50, 'Library Gate', 'Preparing', '2026-08-06 12:35:00'),
 (103, 1, 120.00, 6.00, 'Hostel Block A', 'Prepared', '2026-08-06 12:40:00');

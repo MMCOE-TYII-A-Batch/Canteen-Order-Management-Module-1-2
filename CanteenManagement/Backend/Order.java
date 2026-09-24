@@ -1,11 +1,4 @@
-/* ==========================================================================
-   CAMPUS CANTEEN MANAGEMENT SYSTEM - ORDER POJO (Order.java)
-   --------------------------------------------------------------------------
-   Educational Java Model representing a Canteen Food Order.
-   Status Values: New, Preparing, Prepared, Ready For Delivery, Delivered
-   No advanced frameworks - Plain Java with getters, setters & comments.
-   ========================================================================== */
-
+// added Order entity with getter and setter 
 public class Order {
 
     // ----------------------------------------------------------------------
@@ -17,6 +10,7 @@ public class Order {
     private double totalAmount;
     private String status;
     private String orderDate;
+    private String deliveryAddress;
 
     // ----------------------------------------------------------------------
     // 2. CONSTRUCTORS
@@ -26,7 +20,7 @@ public class Order {
     public Order() {
     }
 
-    // Parameterized Constructor
+    // Parameterized Constructor (without delivery address for backward compatibility)
     public Order(int orderId, String studentName, String items, double totalAmount, String status, String orderDate) {
         this.orderId = orderId;
         this.studentName = studentName;
@@ -34,6 +28,18 @@ public class Order {
         this.totalAmount = totalAmount;
         this.status = status;
         this.orderDate = orderDate;
+        this.deliveryAddress = "Main Canteen Counter";
+    }
+
+    // Parameterized Constructor (with delivery address)
+    public Order(int orderId, String studentName, String items, double totalAmount, String status, String orderDate, String deliveryAddress) {
+        this.orderId = orderId;
+        this.studentName = studentName;
+        this.items = items;
+        this.totalAmount = totalAmount;
+        this.status = status;
+        this.orderDate = orderDate;
+        this.deliveryAddress = deliveryAddress;
     }
 
     // ----------------------------------------------------------------------
@@ -88,6 +94,14 @@ public class Order {
         this.orderDate = orderDate;
     }
 
+    public String getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void setDeliveryAddress(String deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
+    }
+
     @Override
     public String toString() {
         return "Order{" +
@@ -97,6 +111,7 @@ public class Order {
                 ", totalAmount=" + totalAmount +
                 ", status='" + status + '\'' +
                 ", orderDate='" + orderDate + '\'' +
+                ", deliveryAddress='" + deliveryAddress + '\'' +
                 '}';
     }
 }

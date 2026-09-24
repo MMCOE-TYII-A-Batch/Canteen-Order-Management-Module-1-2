@@ -26,6 +26,19 @@
           <li class="nav-item"><a class="nav-link active" href="about.html">About Us</a></li>
           <li class="nav-item"><a class="nav-link" href="contact.html">Contact Us</a></li>
         </ul>
+
+        <!-- Right Side Auth & Cart Links -->
+        <div class="d-flex align-items-center gap-2" id="authButtons">
+          <a href="menu.html" class="btn btn-outline-warning position-relative me-2">
+            <i class="bi bi-cart3"></i> Cart
+            <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+          </a>
+          <a id="profileLink" href="profile.html" class="btn btn-outline-warning btn-sm d-none">
+            <i class="bi bi-person-circle"></i> Profile
+          </a>
+          <a id="loginLink" href="login.html" class="btn btn-canteen-secondary btn-sm">Login</a>
+          <a id="registerLink" href="register.html" class="btn btn-canteen-primary btn-sm">Register</a>
+        </div>
       </div>
     </div>
   </nav>

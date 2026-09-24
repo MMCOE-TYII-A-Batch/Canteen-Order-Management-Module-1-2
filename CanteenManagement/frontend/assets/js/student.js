@@ -31,10 +31,11 @@ function loadLoggedInUserProfile() {
 }
 
 function getOrderApiUrl(queryString = "") {
+  const contextPath = "/canteen";
   if (window.location.origin.startsWith("file:") || window.location.port !== "8080") {
-    return "http://localhost:8080/canteen/order" + queryString;
+    return `http://localhost:8080${contextPath}/order${queryString}`;
   }
-  return "/canteen/order" + queryString;
+  return `${window.location.origin}${contextPath}/order${queryString}`;
 }
 
 async function fetchStudentOrders() {
