@@ -44,19 +44,39 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        String sql = "SELECT u.user_id, u.name, u.email, u.department, r.role_name, u.status " +
+        String normalizedEmail = email.trim().toLowerCase();
+        String sql = "SELECT u.user_id, u.name, u.email, u.department, r.role_name, u.status, u.password " +
                      "FROM users u JOIN roles r ON u.role_id = r.role_id " +
-                     "WHERE u.email = ? AND u.password = ?";
+                     "WHERE u.email = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, email);
-            ps.setString(2, password);
+            ps.setString(1, normalizedEmail);
 
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
+                String dbPassword = rs.getString("password");
+                String hashedPassword = PasswordUtil.hashPassword(password);
+                boolean passwordMatches = hashedPassword.equals(dbPassword);
+
+                if (!passwordMatches && dbPassword.equals(password)) {
+                    passwordMatches = true;
+                    String updateSql = "UPDATE users SET password = ? WHERE email = ?";
+                    try (PreparedStatement updatePs = conn.prepareStatement(updateSql)) {
+                        updatePs.setString(1, hashedPassword);
+                        updatePs.setString(2, normalizedEmail);
+                        updatePs.executeUpdate();
+                    }
+                }
+
+                if (!passwordMatches) {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    out.print("{\"status\":\"error\",\"message\":\"Invalid email or password.\"}");
+                    return;
+                }
+
                 String dbRole = rs.getString("role_name");
                 String status = rs.getString("status");
                 String userName = rs.getString("name");

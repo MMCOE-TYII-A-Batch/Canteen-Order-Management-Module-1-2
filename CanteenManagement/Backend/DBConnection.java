@@ -17,7 +17,7 @@ public class DBConnection {
 
     private static String dbUrl = "jdbc:mysql://localhost:3307/canteen_management?useSSL=false&allowPublicKeyRetrieval=true";
     private static String dbUser = "root";
-    private static String dbPassword = "root";
+    private static String dbPassword = "2005";
 
     static {
         // Step 1: Try reading from local db.properties file (ignored by Git)

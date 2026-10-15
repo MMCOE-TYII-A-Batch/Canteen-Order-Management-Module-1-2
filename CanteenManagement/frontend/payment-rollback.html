@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Payment Rollback | Campus Canteen</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg canteen-navbar navbar-dark">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+          <i class="bi bi-cup-hot-fill me-2 fs-3 text-warning"></i>
+          <span>Campus Canteen</span>
+        </a>
+      </div>
+    </nav>
+
+    <main class="container my-5">
+      <div class="row justify-content-center">
+        <div class="col-lg-7">
+          <div class="card p-4 p-md-5 shadow-lg text-center">
+            <div class="text-success mb-3">
+              <i class="bi bi-arrow-counterclockwise display-1"></i>
+            </div>
+            <h1 class="h3 fw-bold mb-3">Payment Rollback Demo</h1>
+            <p class="text-secondary mb-4">
+              Your payment rollback has been initiated for the cancelled order.
+            </p>
+
+            <div class="text-start border rounded p-3 mb-4 bg-light">
+              <div class="d-flex justify-content-between mb-2">
+                <span>Order</span>
+                <strong id="rollbackOrderId">#--</strong>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Payment status</span>
+                <strong class="text-warning">Rollback in progress</strong>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span>Refund status</span>
+                <strong class="text-success">Initiated</strong>
+              </div>
+            </div>
+
+            <p class="small text-muted mb-4">
+              This is a payment rollback demonstration. The amount will be returned to the original payment method according to the payment provider's processing time.
+            </p>
+
+            <a href="menu.html" class="btn btn-canteen-primary">
+              <i class="bi bi-bag me-2"></i>Return to Menu
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const orderId = new URLSearchParams(window.location.search).get('orderId');
+      if (orderId) {
+        document.getElementById('rollbackOrderId').textContent = `#${orderId}`;
+      }
+    </script>
+  </body>
+</html>

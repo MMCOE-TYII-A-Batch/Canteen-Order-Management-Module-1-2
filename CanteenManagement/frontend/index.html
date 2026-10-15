@@ -41,13 +41,13 @@
         </ul>
 
         <!-- Right Side Auth & Cart Links -->
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2" id="authButtons">
           <a href="menu.html" class="btn btn-outline-warning position-relative me-2">
             <i class="bi bi-cart3"></i> Cart
             <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
           </a>
-          <a href="login.html" class="btn btn-canteen-secondary btn-sm">Login</a>
-          <a href="register.html" class="btn btn-canteen-primary btn-sm">Register</a>
+          <a id="loginLink" href="login.html" class="btn btn-canteen-secondary btn-sm">Login</a>
+          <a id="registerLink" href="register.html" class="btn btn-canteen-primary btn-sm">Register</a>
         </div>
       </div>
     </div>
@@ -108,11 +108,11 @@
     <!-- FEATURED DISHES CAROUSEL SECTION -->
     <section class="mb-5">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="fw-bold mb-0">Today's Specials</h2>
+        <h2 class="fw-bold mb-0" id="todaysSpecialTitle">Today's Specials</h2>
         <a href="menu.html" class="btn btn-sm btn-outline-dark">View Full Menu &rarr;</a>
       </div>
 
-      <div class="row g-4">
+      <div class="row g-4" id="todaysSpecialsContainer">
         <!-- Dish Card 1 -->
         <div class="col-md-4">
           <div class="card custom-card h-100">
@@ -123,7 +123,7 @@
               <p class="card-text text-secondary small">Crispy patty, fresh veggies, and melted cheese slice.</p>
               <div class="d-flex justify-content-between align-items-center">
                 <span class="fs-5 fw-bold">₹80</span>
-                <button class="btn btn-sm btn-canteen-primary" onclick="addToCartMock('Veg Cheese Burger', 80)">Add to Cart</button>
+                <button class="btn btn-sm btn-canteen-primary" onclick="addCartItem('Veg Cheese Burger', 80, 1, 'Snacks', 'Crispy vegetable patty with cheese, fresh lettuce, and special sauce.')">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -139,7 +139,7 @@
               <p class="card-text text-secondary small">Freshly baked pizza loaded with paneer and capsicum.</p>
               <div class="d-flex justify-content-between align-items-center">
                 <span class="fs-5 fw-bold">₹150</span>
-                <button class="btn btn-sm btn-canteen-primary" onclick="addToCartMock('Paneer Pizza', 150)">Add to Cart</button>
+                <button class="btn btn-sm btn-canteen-primary" onclick="addCartItem('Paneer Pizza', 150, 2, 'Combos', 'Freshly baked pizza topped with spiced paneer cubes and mozzarella.')">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -155,7 +155,7 @@
               <p class="card-text text-secondary small">Complete nutritious meal with curries, dal, rice, and roti.</p>
               <div class="d-flex justify-content-between align-items-center">
                 <span class="fs-5 fw-bold">₹120</span>
-                <button class="btn btn-sm btn-canteen-primary" onclick="addToCartMock('Special Veg Thali', 120)">Add to Cart</button>
+                <button class="btn btn-sm btn-canteen-primary" onclick="addCartItem('Special Veg Thali', 120, 3, 'Meals', 'Complete nutritious meal with curries, dal, rice, and roti.')">Add to Cart</button>
               </div>
             </div>
           </div>
