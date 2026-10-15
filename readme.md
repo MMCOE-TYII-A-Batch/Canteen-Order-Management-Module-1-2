@@ -40,3 +40,33 @@ Functional requirements
 * The system shall generate tax invoices, payment receipts, and settlement summaries. COMPLETED
 * The system shall allow authorized staff to record cash payments and manual adjustments. COMPLETED
 * The system shall support refund workflows with reason capture and approval, where applicable. COMPLETED
+
+5) client server architecture
+* client server architecture -COMPLETED
+* session of client -- COMPLETED
+* secure communication between client server-COMPLETED
+* handle multiple queries from multiple clients -COMPLETED
+* data structure required for internal queries-COMPLETED
+* efficiency of the system-COMPLETED
+
+6)Inventory and stock management
+• The system shall maintain stock records for raw materials and consumables, including unit of measure, current balance, reorder level, batch number, purchase date, expiry date, and storage location.-COMPLETED
+• The system shall support stock inward, stock issue to kitchen, stock transfer, stock adjustment, and stock write-off for wastage or spoilage.-COMPLETED
+• The system shall update stock balances in real time after goods receipt, recipe consumption, or manual adjustment, aligning with the requirement for real-time inventory monitoring.-COMPLETED
+• The system shall generate low-stock, out-of-stock, and near-expiry alerts.-COMPLETED
+• The system shall support item-wise consumption tracking based on order volume or production issue.-COMPLETED
+• The system shall maintain wastage records with reason codes such as expired, damaged, overproduction, or pilferage.-COMPLETED
+• The system shall support periodic stock count and variance reconciliation.-COMPLETED
+• The system shall provide stock valuation and daily inventory position reports.-COMPLETED
+
+
+7) Procurement and supplier management
+• The system shall maintain supplier records including contact details, GST or tax details, supplied categories, lead time, and performance notes.-COMPLETED
+• The system shall allow authorized staff to raise purchase requisitions based on low-stock alerts, forecast demand, or manual request.-COMPLETED
+• The system shall allow creation, approval, and issue of purchase orders to selected suppliers.-COMPLETED
+• The system shall record goods receipt against purchase orders with quantity, accepted quantity, rejected quantity, unit price, and batch details.-COMPLETED
+• The system shall support supplier invoice capture and matching with purchase order and goods receipt.-COMPLETED
+• The system shall track pending, partially received, completed, and cancelled purchase orders.-COMPLETED
+• The system shall produce supplier-wise purchase history and price comparison reports.-COMPLETED
+
+
