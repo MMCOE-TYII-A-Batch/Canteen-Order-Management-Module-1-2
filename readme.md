@@ -1,3 +1,5 @@
+Weekly reports- CanteenManagement-> Weekly_reports-> all weekly reports are saved in this folder 
+
 1) User and role management
 Functional requirements
 * The system shall allow users to register with mobile number, email, employee ID, or student ID, depending on organization policy. COMPLETED
