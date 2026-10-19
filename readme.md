@@ -45,11 +45,9 @@ Functional requirements
 
 5) client server architecture
 * client server architecture -COMPLETED
-* session of client -- COMPLETED
 * secure communication between client server-COMPLETED
 * handle multiple queries from multiple clients -COMPLETED
-* data structure required for internal queries-COMPLETED
-* efficiency of the system-COMPLETED
+
 
 6)Inventory and stock management
 * The system shall maintain stock records for raw materials and consumables, including unit of measure, current balance, reorder level, batch number, purchase date, expiry date, and storage location.-COMPLETED
